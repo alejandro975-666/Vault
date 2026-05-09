@@ -3,16 +3,7 @@ import GameCard from '../components/ui/GameCard'
 import SearchBar from '../components/forms/SearchBar'
 import FilterSidebar from '../components/ui/FilterSidebar'
 
-const mockGames = [
-    { id: 1, title: 'Elden Realm', price: '32.99', original_price: '59.99', discount_price: '32.99', discount: 45, platform: 'Steam', image_url: null, categories: [{ name: 'RPG' }], reviews_avg_rating: '4.9' },
-    { id: 2, title: 'Neon Strike', price: '11.99', original_price: '19.99', discount_price: '11.99', discount: 40, platform: 'Epic', image_url: null, categories: [{ name: 'Acción' }], reviews_avg_rating: '4.4' },
-    { id: 3, title: 'Pixel Farm', price: '5.99', original_price: '9.99', discount_price: '5.99', discount: 40, platform: 'Steam', image_url: null, categories: [{ name: 'Indie' }], reviews_avg_rating: '4.8' },
-    { id: 4, title: 'Empire Wars', price: '14.99', original_price: '29.99', discount_price: '14.99', discount: 50, platform: 'GOG', image_url: null, categories: [{ name: 'Estrategia' }], reviews_avg_rating: '4.2' },
-    { id: 5, title: 'Lost Worlds', price: '9.99', original_price: '14.99', discount_price: '9.99', discount: 33, platform: 'Epic', image_url: null, categories: [{ name: 'Aventura' }], reviews_avg_rating: '3.8' },
-    { id: 6, title: 'Dark Echoes', price: '19.99', original_price: '39.99', discount_price: '19.99', discount: 50, platform: 'Steam', image_url: null, categories: [{ name: 'RPG' }], reviews_avg_rating: '4.7' },
-    { id: 7, title: 'Sky Drift', price: '0', original_price: '0', discount_price: '0', discount: 0, platform: 'Epic', image_url: null, categories: [{ name: 'Indie' }], reviews_avg_rating: '4.1' },
-    { id: 8, title: 'Crimson Run', price: '12.99', original_price: '24.99', discount_price: '12.99', discount: 48, platform: 'Steam', image_url: null, categories: [{ name: 'Acción' }], reviews_avg_rating: '4.5' },
-]
+
 
     export default function Home() {
     const doorRef = useRef(null)
