@@ -1,14 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-const mockGames = [
-    { id: 1, title: 'Elden Realm', price: '59.99', category: 'RPG', sales: 412, rating: '4.9', status: 'published' },
-    { id: 2, title: 'Neon Strike', price: '19.99', category: 'Acción', sales: 328, rating: '4.4', status: 'published' },
-    { id: 3, title: 'Pixel Farm', price: '9.99', category: 'Indie', sales: 264, rating: '4.8', status: 'published' },
-    { id: 4, title: 'Empire Wars', price: '29.99', category: 'Estrategia', sales: 198, rating: '4.2', status: 'draft' },
-    { id: 5, title: 'Lost Worlds', price: '14.99', category: 'Aventura', sales: 134, rating: '3.8', status: 'published' },
-    { id: 6, title: 'Dark Echoes', price: '39.99', category: 'RPG', sales: 98, rating: '4.7', status: 'published' },
-    ]
+
 
     const emptyForm = { title: '', price: '', category: '', description: '', image_url: '', status: 'draft' }
 
