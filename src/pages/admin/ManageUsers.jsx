@@ -1,13 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-const mockUsers = [
-    { id: 1, name: 'María R.', email: 'maria@mail.com', role: 'user', active: true, joined: '23 abr 2025', purchases: 5, spent: '189.95' },
-    { id: 2, name: 'José L.', email: 'jose@mail.com', role: 'user', active: true, joined: '18 mar 2025', purchases: 3, spent: '89.97' },
-    { id: 3, name: 'Ana N.', email: 'ana@mail.com', role: 'user', active: false, joined: '2 feb 2025', purchases: 1, spent: '9.99' },
-    { id: 4, name: 'Carlos G.', email: 'carlos@mail.com', role: 'admin', active: true, joined: '1 ene 2025', purchases: 8, spent: '342.92' },
-    { id: 5, name: 'Laura M.', email: 'laura@mail.com', role: 'user', active: true, joined: '10 may 2025', purchases: 2, spent: '49.98' },
-    ]
+
 
     export default function ManageUsers() {
     const [users, setUsers] = useState(mockUsers)
