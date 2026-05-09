@@ -1,26 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-const mockStats = {
-    users: 1482,
-    games: 86,
-    purchases: 4219,
-    revenue: 38450
-    }
 
-    const mockTopGames = [
-    { title: 'Elden Realm', sales: 412, revenue: '24.695,88€' },
-    { title: 'Neon Strike', sales: 328, revenue: '6.556,72€' },
-    { title: 'Pixel Farm', sales: 264, revenue: '2.637,36€' },
-    { title: 'Empire Wars', sales: 198, revenue: '5.939,02€' },
-    { title: 'Lost Worlds', sales: 134, revenue: '2.008,66€' },
-    ]
-
-    const mockRecentUsers = [
-    { id: 1, name: 'María R.', email: 'maria@mail.com', active: true, isNew: true },
-    { id: 2, name: 'José L.', email: 'jose@mail.com', active: true, isNew: false },
-    { id: 3, name: 'Ana N.', email: 'ana@mail.com', active: false, isNew: false },
-    ]
 
     export default function Dashboard() {
     return (
