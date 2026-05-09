@@ -4,24 +4,8 @@ import { useAuth } from '../hooks/useAuth'
 import ReviewForm from '../components/forms/ReviewForm'
 import ReviewCard from '../components/ui/ReviewCard'
 
-// Mock data temporal hasta que Luis tenga el backend
-const mockGame = {
-    id: 1,
-    title: 'Elden Realm',
-    price: '59.99',
-    description: 'Un épico RPG de mundo abierto donde cada decisión moldea el destino del reino. Explora vastos paisajes, combate criaturas legendarias y descubre los secretos de un mundo en ruinas. Con más de 80 horas de contenido principal y un sistema de combate profundo y satisfactorio.',
-    image_url: null,
-    categories: [{ name: 'RPG' }, { name: 'Mundo abierto' }, { name: 'Fantasía' }],
-    reviews_avg_rating: '4.9',
-    developer: 'FromSoft Studios',
-    release_date: '12 mar 2024',
-    languages: 'ES, EN, FR',
-    reviews: [
-        { id: 1, user: { name: 'juanma99' }, rating: 5, body: 'Increíble experiencia, de lo mejor que he jugado en años.', created_at: 'hace 3 días' },
-        { id: 2, user: { name: 'sara_r' }, rating: 4, body: 'Muy buen juego, aunque la curva de dificultad al inicio es bastante dura.', created_at: 'hace 1 semana' },
-        { id: 3, user: { name: 'player_one' }, rating: 5, body: 'Una obra maestra. El mundo es enorme y cada rincón tiene algo que descubrir.', created_at: 'hace 2 semanas' },
-    ]
-    }
+
+
 
     export default function GameDetail() {
     const { id } = useParams()
