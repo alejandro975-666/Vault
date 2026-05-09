@@ -19,14 +19,7 @@ export function AuthProvider({ children }) {
         const storedUser = localStorage.getItem('user')
         if (storedUser) {
             setUser(JSON.parse(storedUser))
-        } else {
-            // Usuario mock temporal para desarrollo
-            const mockUser = { id: 1, name: 'Alejandro', email: 'alejandro@vault.com', role: 'admin' }
-            setUser(mockUser)
-            setToken('mock-token')
-            localStorage.setItem('user', JSON.stringify(mockUser))
-            localStorage.setItem('token', 'mock-token')
-        }
+        } 
         setLoading(false)
     }, [])
 
