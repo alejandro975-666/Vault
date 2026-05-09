@@ -1,62 +1,7 @@
 import React, { useState } from 'react'
 import GameCard from '../components/ui/GameCard'
 
-const mockInterests = [
-    { category: 'RPG', searches: 14, color: '#534AB7' },
-    { category: 'Indie', searches: 9, color: '#1D9E75' },
-    { category: 'Acción', searches: 5, color: '#993C1D' },
-    { category: 'Estrategia', searches: 3, color: '#BA7517' },
-    ]
 
-    const mockRecentSearches = [
-    'juegos RPG mundo abierto',
-    'indie pixel art',
-    'multijugador cooperativo',
-    'RPG historia profunda',
-    ]
-
-    const mockFeedSections = [
-    {
-        id: 1,
-        reason: 'Porque te gustan los RPG',
-        badge: 'RPG',
-        games: [
-        { id: 10, title: 'Arcane Chronicles', price: '49.99', image_url: null, categories: [{ name: 'RPG' }], reviews_avg_rating: '4.9' },
-        { id: 11, title: "Dragon's Oath", price: '34.99', image_url: null, categories: [{ name: 'RPG' }], reviews_avg_rating: '4.4' },
-        { id: 12, title: 'Mythbound', price: '39.99', image_url: null, categories: [{ name: 'RPG' }], reviews_avg_rating: '4.7' },
-        ]
-    },
-    {
-        id: 2,
-        reason: 'Porque te gustan los Indie',
-        badge: 'Indie',
-        games: [
-        { id: 13, title: 'Hollow Peaks', price: '9.99', image_url: null, categories: [{ name: 'Indie' }], reviews_avg_rating: '4.8' },
-        { id: 14, title: 'Ember Isle', price: '7.99', image_url: null, categories: [{ name: 'Indie' }], reviews_avg_rating: '4.3' },
-        { id: 15, title: 'Roots & Rain', price: '12.99', image_url: null, categories: [{ name: 'Indie' }], reviews_avg_rating: '4.6' },
-        ]
-    },
-    {
-        id: 3,
-        reason: 'No están en tu biblioteca',
-        badge: 'Acción',
-        games: [
-        { id: 16, title: 'Velocity X', price: '24.99', image_url: null, categories: [{ name: 'Acción' }], reviews_avg_rating: '4.2' },
-        { id: 17, title: 'Iron Fist 2', price: '15.99', image_url: null, categories: [{ name: 'Acción' }], reviews_avg_rating: '3.9' },
-        { id: 18, title: 'Surge Protocol', price: '29.99', image_url: null, categories: [{ name: 'Acción' }], reviews_avg_rating: '4.5' },
-        ]
-    },
-    ]
-
-    const mockHighlight = {
-    id: 9,
-    title: 'Shadow Throne',
-    price: '44.99',
-    description: 'Un RPG de fantasía oscura con un sistema de decisiones que moldea cada partida. Más de 60 horas de historia y combate táctico en tiempo real.',
-    image_url: null,
-    categories: [{ name: 'RPG' }],
-    reviews_avg_rating: '4.8',
-    }
 
     export default function Feed() {
     const [dismissedSearches, setDismissedSearches] = useState([])
