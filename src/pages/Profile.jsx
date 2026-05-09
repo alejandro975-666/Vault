@@ -2,35 +2,7 @@ import React, { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import GameCard from '../components/ui/GameCard'
 
-const mockLibrary = [
-    { id: 1, title: 'Elden Realm', price: '59.99', image_url: null, categories: [{ name: 'RPG' }], reviews_avg_rating: '4.9' },
-    { id: 2, title: 'Neon Strike', price: '19.99', image_url: null, categories: [{ name: 'Acción' }], reviews_avg_rating: '4.4' },
-    { id: 3, title: 'Pixel Farm', price: '9.99', image_url: null, categories: [{ name: 'Indie' }], reviews_avg_rating: '4.8' },
-    ]
 
-    const mockWishlist = [
-    { id: 4, title: 'Empire Wars', price: '29.99', image_url: null, categories: [{ name: 'Estrategia' }], reviews_avg_rating: '4.2' },
-    { id: 5, title: 'Lost Worlds', price: '14.99', image_url: null, categories: [{ name: 'Aventura' }], reviews_avg_rating: '3.8' },
-    ]
-
-    const mockPurchases = [
-    { id: 1, game: { title: 'Elden Realm' }, price_paid: '59.99', purchased_at: '12 abr 2025' },
-    { id: 2, game: { title: 'Neon Strike' }, price_paid: '19.99', purchased_at: '3 mar 2025' },
-    { id: 3, game: { title: 'Pixel Farm' }, price_paid: '9.99', purchased_at: '18 feb 2025' },
-    ]
-
-    const mockFriends = [
-    { id: 1, name: 'juanma99', status: 'online', game: 'Elden Realm' },
-    { id: 2, name: 'sara_r', status: 'busy', game: 'Neon Strike' },
-    { id: 3, name: 'player_one', status: 'offline', game: null },
-    ]
-
-    const mockAchievements = [
-    { id: 1, title: 'Primer paso', desc: 'Compra tu primer juego', unlocked: true },
-    { id: 2, title: 'Crítico', desc: 'Escribe 5 reseñas', unlocked: true },
-    { id: 3, title: 'Coleccionista', desc: 'Ten 10 juegos en tu biblioteca', unlocked: false },
-    { id: 4, title: 'Explorador', desc: 'Busca en 10 categorías distintas', unlocked: false },
-    ]
 
     const tabs = ['Biblioteca', 'Lista de deseos', 'Historial', 'Amigos', 'Logros', 'Configuración']
 
