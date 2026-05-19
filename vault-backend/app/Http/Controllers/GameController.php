@@ -1,0 +1,143 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Game;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
+class GameController extends Controller
+{
+    public function index(Request $request)
+    {
+        $query = Game::with(['categories', 'reviews'])
+            ->withAvg('reviews', 'rating')
+            ->where('status', 'published');
+
+        // Filtro por categoría
+        if ($request->filled('category')) {
+            $query->whereHas('categories', fn($q) =>
+                $q->where('name', $request->category)
+            );
+        }
+
+        // Filtro por plataforma
+        if ($request->filled('platform')) {
+            $query->where('platform', $request->platform);
+        }
+
+        // Filtro por precio
+        if ($request->filled('price')) {
+            match ($request->price) {
+                'free'    => $query->where('price', 0),
+                'under10' => $query->where('price', '<', 10)->where('price', '>', 0),
+                '10to30'  => $query->whereBetween('price', [10, 30]),
+                'over30'  => $query->where('price', '>', 30),
+                default   => null,
+            };
+        }
+
+        // Filtro por valoración mínima
+        if ($request->filled('rating')) {
+            $query->havingRaw('AVG(reviews.rating) >= ?', [$request->rating]);
+        }
+
+        // Ordenación
+        match ($request->get('sort', 'popular')) {
+            'price_asc'  => $query->orderBy('price', 'asc'),
+            'price_desc' => $query->orderBy('price', 'desc'),
+            'rating'     => $query->orderByDesc('reviews_avg_rating'),
+            'newest'     => $query->orderByDesc('release_date'),
+            default      => $query->orderByDesc('id'),
+        };
+
+        return response()->json($query->get());
+    }
+
+    public function show(Game $game)
+    {
+        $game->load(['categories', 'reviews.user']);
+        $game->loadAvg('reviews', 'rating');
+        return response()->json($game);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'title'          => 'required|string|max:255',
+            'description'    => 'nullable|string',
+            'developer'      => 'nullable|string|max:255',
+            'publisher'      => 'nullable|string|max:255',
+            'release_date'   => 'nullable|date',
+            'price'          => 'required|numeric|min:0',
+            'original_price' => 'nullable|numeric|min:0',
+            'discount'       => 'nullable|integer|min:0|max:100',
+            'image_url'      => 'nullable|url',
+            'platform'       => 'nullable|string',
+            'languages'      => 'nullable|string',
+            'status'         => 'in:draft,published',
+            'categories'     => 'nullable|array',
+            'categories.*'   => 'exists:categories,id',
+        ]);
+
+        $game = Game::create($data);
+
+        if (!empty($data['categories'])) {
+            $game->categories()->sync($data['categories']);
+        }
+
+        return response()->json($game->load('categories'), 201);
+    }
+
+    public function update(Request $request, Game $game)
+    {
+        $data = $request->validate([
+            'title'          => 'sometimes|string|max:255',
+            'description'    => 'nullable|string',
+            'developer'      => 'nullable|string|max:255',
+            'publisher'      => 'nullable|string|max:255',
+            'release_date'   => 'nullable|date',
+            'price'          => 'sometimes|numeric|min:0',
+            'original_price' => 'nullable|numeric|min:0',
+            'discount'       => 'nullable|integer|min:0|max:100',
+            'image_url'      => 'nullable|url',
+            'platform'       => 'nullable|string',
+            'languages'      => 'nullable|string',
+            'status'         => 'in:draft,published',
+            'categories'     => 'nullable|array',
+            'categories.*'   => 'exists:categories,id',
+        ]);
+
+        $game->update($data);
+
+        if (isset($data['categories'])) {
+            $game->categories()->sync($data['categories']);
+        }
+
+        return response()->json($game->load('categories'));
+    }
+
+    public function destroy(Game $game)
+    {
+        $game->delete();
+        return response()->json(['message' => 'Juego eliminado.']);
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->validate(['query' => 'required|string|min:2'])['query'];
+
+        $games = Game::with(['categories'])
+            ->withAvg('reviews', 'rating')
+            ->where('status', 'published')
+            ->where(function ($q) use ($query) {
+                $q->where('title', 'LIKE', "%{$query}%")
+                  ->orWhere('description', 'LIKE', "%{$query}%")
+                  ->orWhere('developer', 'LIKE', "%{$query}%");
+            })
+            ->limit(20)
+            ->get();
+
+        return response()->json($games);
+    }
+}
