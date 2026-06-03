@@ -9,30 +9,29 @@ return new class extends Migration
     
     public function up(): void
     {
-        Schema::create('reviews', function (Blueprint $table) {
+        Schema::create('search_histories', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('user_id');
-            $table->uuid('game_id');
-            $table->unsignedTinyInteger('rating'); // 1-5
-            $table->text('body');
+            $table->string('query');
+            $table->uuid('category_id')->nullable();
+            $table->timestamp('searched_at')->useCurrent();
 
             $table->foreign('user_id')
                   ->references('id')
                   ->on('users')
                   ->onDelete('cascade');
 
-            $table->foreign('game_id')
+            $table->foreign('category_id')
                   ->references('id')
-                  ->on('games')
-                  ->onDelete('cascade');
+                  ->on('categories')
+                  ->nullOnDelete();
 
-            $table->unique(['user_id', 'game_id']); // una reseña por usuario por juego
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('reviews');
+        Schema::dropIfExists('search_histories');
     }
 };

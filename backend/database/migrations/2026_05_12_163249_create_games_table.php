@@ -6,13 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    
     public function up(): void
     {
         Schema::create('games', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('developer')->nullable();
@@ -20,18 +18,21 @@ return new class extends Migration
             $table->date('release_date')->nullable();
             $table->decimal('price', 8, 2)->default(0);
             $table->decimal('original_price', 8, 2)->nullable();
-            $table->unsignedTinyInteger('discount')->default(0); // porcentaje 0-100
+            $table->decimal('discount_price', 8, 2)->nullable();
+            $table->unsignedTinyInteger('discount')->default(0);
             $table->string('image_url')->nullable();
-            $table->string('platform')->nullable(); // Steam, Epic, etc.
+            $table->string('platform')->nullable();
             $table->string('languages')->nullable();
             $table->enum('status', ['draft', 'published'])->default('draft');
+            $table->uuid('admin_id')->nullable();
+            $table->foreign('admin_id')
+                  ->references('id')
+                  ->on('users')
+                  ->nullOnDelete();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('games');
