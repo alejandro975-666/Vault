@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import Spinner from '../../components/ui/Spinner'
-import { getGames, createGame, updateGame, deleteGame, getCategories } from '../../api/games'
- 
+import { getGames, getCategories } from '../../api/games'
+import { createGame, updateGame, deleteGame } from '../../api/admin'
+
 const emptyForm = {
   title: '', price: '', description: '', image_url: '',
   platform: '', developer: '', status: 'draft', categories: []
 }
- 
+
 export default function ManageGames() {
   const [games, setGames] = useState([])
   const [categories, setCategories] = useState([])
@@ -19,7 +20,7 @@ export default function ManageGames() {
   const [search, setSearch] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
- 
+
   useEffect(() => {
     Promise.all([
       getGames({ status: 'all' }),
@@ -32,11 +33,11 @@ export default function ManageGames() {
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])
- 
+
   const filteredGames = games.filter((g) =>
     g.title.toLowerCase().includes(search.toLowerCase())
   )
- 
+
   const handleEdit = (game) => {
     setSelectedGame(game)
     setForm({
@@ -52,14 +53,14 @@ export default function ManageGames() {
     setShowModal(true)
     setError(null)
   }
- 
+
   const handleNew = () => {
     setSelectedGame(null)
     setForm(emptyForm)
     setShowModal(true)
     setError(null)
   }
- 
+
   const handleSave = async () => {
     setSaving(true)
     setError(null)
@@ -78,12 +79,12 @@ export default function ManageGames() {
       setSaving(false)
     }
   }
- 
+
   const handleDeleteConfirm = (game) => {
     setSelectedGame(game)
     setShowDeleteModal(true)
   }
- 
+
   const handleDelete = async () => {
     try {
       await deleteGame(selectedGame.id)
@@ -93,7 +94,7 @@ export default function ManageGames() {
       console.error(err)
     }
   }
- 
+
   const toggleCategory = (catId) => {
     setForm((f) => ({
       ...f,
@@ -102,7 +103,7 @@ export default function ManageGames() {
         : [...f.categories, catId],
     }))
   }
- 
+
   if (loading) {
     return (
       <div className="bg-vault-black min-h-screen flex items-center justify-center">
@@ -110,11 +111,11 @@ export default function ManageGames() {
       </div>
     )
   }
- 
+
   return (
     <div className="bg-vault-black min-h-screen font-mono">
       <div className="max-w-7xl mx-auto px-6 py-10">
- 
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -132,7 +133,7 @@ export default function ManageGames() {
             + Nuevo juego
           </button>
         </div>
- 
+
         {/* Buscador */}
         <div className="mb-6">
           <input
@@ -143,7 +144,7 @@ export default function ManageGames() {
             className="w-full max-w-sm bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
           />
         </div>
- 
+
         {/* Tabla */}
         <div className="bg-vault-dark border border-vault-green-dark rounded-lg overflow-hidden">
           <div className="grid grid-cols-12 gap-4 px-5 py-3 border-b border-vault-green-dark">
@@ -153,7 +154,7 @@ export default function ManageGames() {
             <span className="col-span-2 text-vault-hint text-xs tracking-widest uppercase">Estado</span>
             <span className="col-span-2 text-vault-hint text-xs tracking-widest uppercase">Acciones</span>
           </div>
- 
+
           {filteredGames.map((game, i) => (
             <div
               key={game.id}
@@ -196,14 +197,14 @@ export default function ManageGames() {
               </div>
             </div>
           ))}
- 
+
           {filteredGames.length === 0 && (
-            <div className="px-5 py-10 text-center text-vault-hint text-xs tracking-widest">
+            <div className="px-5 py-10 text-center text-vault-hint text-xs tracking-widests">
               No se encontraron juegos
             </div>
           )}
         </div>
- 
+
         {/* Modal crear/editar */}
         {showModal && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 px-4">
@@ -217,13 +218,13 @@ export default function ManageGames() {
                 </div>
                 <button onClick={() => setShowModal(false)} className="text-vault-hint hover:text-vault-error transition-colors text-lg">✕</button>
               </div>
- 
+
               {error && (
                 <div className="border border-vault-error/40 bg-vault-error/10 text-vault-error rounded px-4 py-3 mb-4 text-xs">
                   ⚠ {error}
                 </div>
               )}
- 
+
               <div className="flex flex-col gap-4">
                 <div>
                   <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Título</label>
@@ -234,7 +235,7 @@ export default function ManageGames() {
                     className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
                   />
                 </div>
- 
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Precio (€)</label>
@@ -259,7 +260,7 @@ export default function ManageGames() {
                     </select>
                   </div>
                 </div>
- 
+
                 <div>
                   <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Desarrollador</label>
                   <input
@@ -269,7 +270,7 @@ export default function ManageGames() {
                     className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
                   />
                 </div>
- 
+
                 <div>
                   <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Descripción</label>
                   <textarea
@@ -279,7 +280,7 @@ export default function ManageGames() {
                     className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono resize-none"
                   />
                 </div>
- 
+
                 <div>
                   <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">URL de imagen</label>
                   <input
@@ -290,7 +291,7 @@ export default function ManageGames() {
                     className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
                   />
                 </div>
- 
+
                 <div>
                   <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Categorías</label>
                   <div className="flex flex-wrap gap-2">
@@ -310,7 +311,7 @@ export default function ManageGames() {
                     ))}
                   </div>
                 </div>
- 
+
                 <div>
                   <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Estado</label>
                   <div className="flex gap-2">
@@ -330,7 +331,7 @@ export default function ManageGames() {
                   </div>
                 </div>
               </div>
- 
+
               <div className="flex gap-3 mt-6 justify-end">
                 <button
                   onClick={() => setShowModal(false)}
@@ -349,7 +350,7 @@ export default function ManageGames() {
             </div>
           </div>
         )}
- 
+
         {/* Modal confirmar borrado */}
         {showDeleteModal && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 px-4">
@@ -379,9 +380,8 @@ export default function ManageGames() {
             </div>
           </div>
         )}
- 
+
       </div>
     </div>
   )
 }
- 
