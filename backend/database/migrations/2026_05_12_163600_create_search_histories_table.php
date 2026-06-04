@@ -6,28 +6,29 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    
     public function up(): void
     {
-        Schema::create('search_histories', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('user_id');
-            $table->string('query');
-            $table->uuid('category_id')->nullable();
-            $table->timestamp('searched_at')->useCurrent();
+        if (!Schema::hasTable('search_histories')) {
+            Schema::create('search_histories', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->uuid('user_id');
+                $table->string('query');
+                $table->uuid('category_id')->nullable();
+                $table->timestamp('searched_at')->useCurrent();
 
-            $table->foreign('user_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('cascade');
+                $table->foreign('user_id')
+                      ->references('id')
+                      ->on('users')
+                      ->onDelete('cascade');
 
-            $table->foreign('category_id')
-                  ->references('id')
-                  ->on('categories')
-                  ->nullOnDelete();
+                $table->foreign('category_id')
+                      ->references('id')
+                      ->on('categories')
+                      ->nullOnDelete();
 
-            $table->timestamps();
-        });
+                $table->timestamps();
+            });
+        }
     }
 
     public function down(): void
