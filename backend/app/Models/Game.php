@@ -3,11 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class Game extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
+
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     protected $fillable = [
         'title',
@@ -38,7 +42,7 @@ class Game extends Model
 
     public function categories()
     {
-        return $this->belongsToMany(Category::class);
+        return $this->belongsToMany(Category::class, 'game_category', 'game_id', 'category_id');
     }
 
     public function reviews()
@@ -63,21 +67,15 @@ class Game extends Model
 
     // ─── Accessors ─────────────────────────────────────────
 
-    // Precio final con descuento aplicado
     public function getDiscountPriceAttribute($value)
     {
-        // Si tiene valor en BD lo devuelve directamente
         if ($value) return $value;
-
-        // Si no, lo calcula a partir del precio base y el descuento
         if ($this->discount > 0) {
             return round($this->price * (1 - $this->discount / 100), 2);
         }
-
         return $this->price;
     }
 
-    // Precio original (si no tiene, devuelve el precio base)
     public function getOriginalPriceAttribute($value)
     {
         return $value ?? $this->price;
@@ -85,13 +83,11 @@ class Game extends Model
 
     // ─── Scopes ────────────────────────────────────────────
 
-    // Solo juegos publicados
     public function scopePublished($query)
     {
         return $query->where('status', 'published');
     }
 
-    // Ordenar por mayor descuento
     public function scopeByDiscount($query)
     {
         return $query->orderBy('discount', 'desc');
