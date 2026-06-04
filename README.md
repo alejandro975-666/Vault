@@ -268,9 +268,9 @@ El frontend estará disponible en `http://localhost:5173`
 
 | Email | Contraseña | Rol |
 |---|---|---|
-| admin@vault.com | password | Administrador |
-| alejandro@vault.com | password | Usuario normal |
-| luis@vault.com | password | Usuario normal |
+| fran@vault.com | password | Administrador |
+| alejandro@vault.com | password | Administrador |
+| luis@vault.com | password | Administrador |
 
 ---
 
