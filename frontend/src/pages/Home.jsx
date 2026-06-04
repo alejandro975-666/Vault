@@ -4,7 +4,7 @@ import SearchBar from '../components/forms/SearchBar'
 import FilterSidebar from '../components/ui/FilterSidebar'
 import Spinner from '../components/ui/Spinner'
 import { getGames } from '../api/games'
- 
+
 export default function Home() {
   const doorRef = useRef(null)
   const leftPanelRef = useRef(null)
@@ -12,31 +12,31 @@ export default function Home() {
   const catalogRef = useRef(null)
   const [doorOpen, setDoorOpen] = useState(false)
   const prevProgressRef = useRef(0)
-  const [filters, setFilters] = useState({ categories: [], price: 'all', rating: null, query: '' })
+  const [filters, setFilters] = useState({ category: null, price: 'all', rating: null, platform: null, query: '' })
   const [sort, setSort] = useState('popular')
   const [games, setGames] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
- 
+
   // Cargar juegos desde la API
   useEffect(() => {
     setLoading(true)
     setError(null)
- 
+
     const params = {}
-    if (filters.query) params.query = filters.query
-    if (filters.categories.length > 0) params.category = filters.categories[0]
+    if (filters.query)    params.query    = filters.query
+    if (filters.category) params.category = filters.category
     if (filters.price && filters.price !== 'all') params.price = filters.price
-    if (filters.rating) params.rating = filters.rating
+    if (filters.rating)   params.rating   = filters.rating
     if (filters.platform) params.platform = filters.platform
     params.sort = sort
- 
+
     getGames(params)
       .then((res) => setGames(res.data))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }, [filters, sort])
- 
+
   useEffect(() => {
     const glitchIn = (el) => {
       if (!el) return
@@ -53,7 +53,7 @@ export default function Home() {
         }
       }, 60)
     }
- 
+
     const glitchOut = (el) => {
       if (!el) return
       let count = 0
@@ -68,49 +68,49 @@ export default function Home() {
         }
       }, 60)
     }
- 
+
     const handleScroll = () => {
       const scrollY = window.scrollY
       const maxScroll = window.innerHeight * 1.2
       const progress = Math.min(scrollY / maxScroll, 1)
       const prevProgress = prevProgressRef.current
       prevProgressRef.current = progress
- 
+
       const spinProgress = Math.min(progress / 0.5, 1)
       const rotation = spinProgress * 360
       const openProgress = Math.max((progress - 0.5) / 0.5, 0)
       const translateX = openProgress * 110
- 
+
       if (doorRef.current) {
         doorRef.current.style.transform = `rotate(${rotation}deg)`
       }
- 
+
       if (leftPanelRef.current && rightPanelRef.current) {
         leftPanelRef.current.style.transform = `translateX(-${translateX}%)`
         rightPanelRef.current.style.transform = `translateX(${translateX}%)`
       }
- 
+
       if (progress >= 1 && prevProgress < 1 && !doorOpen) {
         setDoorOpen(true)
         glitchIn(catalogRef.current)
       }
- 
+
       if (progress < 1 && prevProgress >= 1 && doorOpen) {
         setDoorOpen(false)
         glitchOut(catalogRef.current)
       }
     }
- 
+
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [doorOpen])
- 
+
   return (
     <div className="bg-vault-black min-h-screen font-mono">
- 
+
       <div className="relative h-[250vh]">
         <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
- 
+
           {/* Fondo */}
           <div className="absolute inset-0 bg-vault-black">
             <div
@@ -120,7 +120,7 @@ export default function Home() {
               }}
             />
           </div>
- 
+
           {/* Panel izquierdo */}
           <div
             ref={leftPanelRef}
@@ -141,7 +141,7 @@ export default function Home() {
               </div>
             </div>
           </div>
- 
+
           {/* Panel derecho */}
           <div
             ref={rightPanelRef}
@@ -162,7 +162,7 @@ export default function Home() {
               </div>
             </div>
           </div>
- 
+
           {/* Marco ovalado */}
           <div
             className="absolute w-[500px] h-[260px] rounded-full border-8 border-[#0a0c0a] flex items-center justify-center"
@@ -170,7 +170,7 @@ export default function Home() {
           >
             <div className="w-[480px] h-[240px] rounded-full bg-[#0d0f0d] border-4 border-[#1a2a1a]"></div>
           </div>
- 
+
           {/* PUERTA CIRCULAR */}
           <div
             ref={doorRef}
@@ -199,9 +199,9 @@ export default function Home() {
                   </feMerge>
                 </filter>
               </defs>
- 
+
               <circle cx="170" cy="170" r="165" fill="url(#metalGrad)" stroke="#4a5040" strokeWidth="4" />
- 
+
               {[...Array(16)].map((_, i) => {
                 const angle = (i * 22.5 * Math.PI) / 180
                 const x1 = 170 + 148 * Math.cos(angle)
@@ -215,9 +215,9 @@ export default function Home() {
                   </g>
                 )
               })}
- 
+
               <circle cx="170" cy="170" r="138" fill="url(#innerGrad)" stroke="#3a4030" strokeWidth="5" />
- 
+
               {[...Array(12)].map((_, i) => {
                 const angle = (i * 30 * Math.PI) / 180
                 const x = 170 + 124 * Math.cos(angle)
@@ -229,9 +229,9 @@ export default function Home() {
                   </g>
                 )
               })}
- 
+
               <circle cx="170" cy="170" r="108" fill="#0d0f0d" stroke="#1a7a0a" strokeWidth="4" />
- 
+
               {[...Array(8)].map((_, i) => {
                 const angle = (i * 45 * Math.PI) / 180
                 const x1 = 170 + 112 * Math.cos(angle)
@@ -240,14 +240,14 @@ export default function Home() {
                 const y2 = 170 + 90 * Math.sin(angle)
                 return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#1a7a0a" strokeWidth="3" />
               })}
- 
+
               <circle cx="170" cy="170" r="86" fill="#0a0c0a" stroke="#39ff14" strokeWidth="2" />
               <circle cx="170" cy="170" r="78" fill="none" stroke="#1a7a0a" strokeWidth="1" strokeDasharray="6 4" />
- 
+
               <text x="170" y="196" textAnchor="middle" fontSize="90" fontWeight="bold" fontFamily="monospace" fill="#39ff14" filter="url(#glow)">
                 V
               </text>
- 
+
               <path id="topArc" d="M 70,170 A 100,100 0 0,1 270,170" fill="none" />
               <path id="bottomArc" d="M 70,170 A 100,100 0 0,0 270,170" fill="none" />
               <text fontSize="11" fill="#7ab87a" letterSpacing="5">
@@ -258,7 +258,7 @@ export default function Home() {
               </text>
             </svg>
           </div>
- 
+
           {/* Indicador scroll */}
           {!doorOpen && (
             <div className="absolute bottom-10 left-10 text-left" style={{ zIndex: 20 }}>
@@ -268,10 +268,10 @@ export default function Home() {
               </div>
             </div>
           )}
- 
+
         </div>
       </div>
- 
+
       {/* CATÁLOGO */}
       <div
         ref={catalogRef}
@@ -283,7 +283,7 @@ export default function Home() {
           <p className="text-vault-muted text-sm tracking-wide mb-4">Explora nuestra colección de títulos</p>
           <SearchBar onSearch={(q) => setFilters((f) => ({ ...f, query: q }))} />
         </div>
- 
+
         <div className="flex gap-8">
           <FilterSidebar filters={filters} onChange={setFilters} />
           <div className="flex-1">
@@ -303,25 +303,25 @@ export default function Home() {
                 <option value="newest">Más recientes</option>
               </select>
             </div>
- 
+
             {loading && (
               <div className="flex justify-center py-20">
                 <Spinner text="Cargando catálogo..." />
               </div>
             )}
- 
+
             {error && (
               <div className="border border-vault-error/40 bg-vault-error/10 text-vault-error rounded px-4 py-3 text-sm">
                 ⚠ Error al cargar los juegos: {error}
               </div>
             )}
- 
+
             {!loading && !error && games.length === 0 && (
               <div className="text-center py-20">
                 <p className="text-vault-hint text-sm tracking-widest">No se encontraron juegos</p>
               </div>
             )}
- 
+
             {!loading && !error && games.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                 {games.map((game) => (
@@ -332,7 +332,7 @@ export default function Home() {
           </div>
         </div>
       </div>
- 
+
     </div>
   )
 }
