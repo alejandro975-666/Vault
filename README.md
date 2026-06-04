@@ -1,8 +1,8 @@
-# 🔒 VAULT GAMES
+# 🔒 VAULT
 
 > Plataforma web de compra y distribución de claves de videojuegos para PC, diseñada para ofrecer una experiencia moderna, personalizada y segura a jugadores que buscan videojuegos a precios competitivos.
 
-![Vault Games](https://img.shields.io/badge/Vault-Games-39ff14?style=for-the-badge&labelColor=0a0c0a)
+![Vault](https://img.shields.io/badge/Vault-Games-39ff14?style=for-the-badge&labelColor=0a0c0a)
 ![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![Laravel](https://img.shields.io/badge/Laravel-11-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
