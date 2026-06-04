@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
@@ -21,7 +20,6 @@ class CategoryController extends Controller
 
         $category = Category::create([
             'name' => $data['name'],
-            'slug' => Str::slug($data['name']),
         ]);
 
         return response()->json($category, 201);
