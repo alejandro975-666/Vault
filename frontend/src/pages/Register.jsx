@@ -132,7 +132,7 @@ export default function Register() {
             </div>
 
             <p className="text-center text-vault-hint text-xs mt-6 tracking-widest">
-            VAULT-TEC INDUSTRIES © 2077
+            VAULT-TEC INDUSTRIES © 2026
             </p>
 
         </div>
