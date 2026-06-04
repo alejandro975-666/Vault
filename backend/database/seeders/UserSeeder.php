@@ -2,17 +2,15 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Models\Category;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
-class DatabaseSeeder extends Seeder
+class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // ─── Usuarios admin ────────────────────────────────────
         User::create([
             'id'       => (string) Str::uuid(),
             'name'     => 'Alejandro',
@@ -39,18 +37,5 @@ class DatabaseSeeder extends Seeder
             'role'     => 'admin',
             'active'   => true,
         ]);
-
-        // ─── Categorías ────────────────────────────────────────
-        $categories = [
-            'RPG', 'Acción', 'Indie', 'Estrategia',
-            'Aventura', 'Deportes', 'Terror', 'Simulación'
-        ];
-
-        foreach ($categories as $name) {
-            Category::create([
-                'id'   => (string) Str::uuid(),
-                'name' => $name,
-            ]);
-        }
     }
 }
