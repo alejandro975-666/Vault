@@ -3,16 +3,16 @@ import { Link } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
 
 const platformColors = {
-  Steam:          { bg: '#1b2838', color: '#c7d5e0' },
-  Epic:           { bg: '#2a2a2a', color: '#ffffff' },
-  GOG:            { bg: '#392069', color: '#ffffff' },
-  Xbox:           { bg: '#107c10', color: '#ffffff' },
-  PlayStation:    { bg: '#003087', color: '#ffffff' },
-  'Battle.net':   { bg: '#148eff', color: '#ffffff' },
-  EA:             { bg: '#ff4747', color: '#ffffff' },
-  Ubisoft:        { bg: '#0070f3', color: '#ffffff' },
-  Nintendo:       { bg: '#e4000f', color: '#ffffff' },
-  Rockstar:       { bg: '#fcaf17', color: '#000000' },
+  Steam:        { bg: '#1b2838', color: '#c7d5e0' },
+  Epic:         { bg: '#2a2a2a', color: '#ffffff' },
+  GOG:          { bg: '#ffffff', color: '#392069' },
+  Xbox:         { bg: '#ffffff', color: '#107c10' },
+  PlayStation:  { bg: '#003087', color: '#ffffff' },
+  'Battle.net': { bg: '#009ae4', color: '#ffffff' },
+  EA:           { bg: '#000000', color: '#ffffff' },
+  Ubisoft:      { bg: '#0070f3', color: '#ffffff' },
+  Nintendo:     { bg: '#e4000f', color: '#ffffff' },
+  Rockstar:     { bg: '#fcaf17', color: '#000000' },
 }
 
 const platformLogos = {
@@ -25,9 +25,8 @@ const platformLogos = {
   EA:           'https://upload.wikimedia.org/wikipedia/commons/0/0d/Electronic-Arts-Logo.svg',
   Ubisoft:      'https://upload.wikimedia.org/wikipedia/commons/7/7b/Ubisoft_logo.svg',
   Nintendo:     'https://upload.wikimedia.org/wikipedia/commons/0/0d/Nintendo.svg',
-  Rockstar:     'https://upload.wikimedia.org/wikipedia/commons/0/08/Rockstar_Games_Logo.svg',
+  Rockstar:     'https://upload.wikimedia.org/wikipedia/commons/a/a5/Rockstar_Games_Logo.svg',
 }
-
 export default function GameCard({ game }) {
   const hasDiscount   = game.discount && game.discount > 0
   const price         = game.discount_price || game.price
