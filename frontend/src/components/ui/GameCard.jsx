@@ -5,7 +5,7 @@ import { useCart } from '../../context/CartContext'
 const platformColors = {
   Steam:        { bg: '#1b2838', color: '#c7d5e0' },
   Epic:         { bg: '#2a2a2a', color: '#ffffff' },
-  GOG:          { bg: '#392069', color: '#ffffff' },
+  GOG:          { bg: '#2a2a2a', color: '#ffffff' },
   Xbox:         { bg: '#ffffff', color: '#107c10' },
   PlayStation:  { bg: '#003087', color: '#ffffff' },
   'Battle.net': { bg: '#009ae4', color: '#ffffff' },
