@@ -12,10 +12,12 @@ import Register from '../pages/Register'
 import Profile from '../pages/Profile'
 import Feed from '../pages/Feed'
 import Cart from '../pages/Cart'
+import Checkout from '../pages/Checkout'
 import Dashboard from '../pages/admin/Dashboard'
 import ManageGames from '../pages/admin/ManageGames'
 import ManageUsers from '../pages/admin/ManageUsers'
 import NotFound from '../pages/NotFound'
+
 
 function PrivateRoute({ children }) {
   const { token } = useAuth()
@@ -45,6 +47,7 @@ export default function AppRoutes() {
                   <Route path="/"             element={<Home />} />
                   <Route path="/games/:id"    element={<GameDetail />} />
                   <Route path="/cart"         element={<Cart />} />
+                  <Route path="/checkout"     element={<PrivateRoute><Checkout /></PrivateRoute>} />
                   <Route path="/profile"      element={<PrivateRoute><Profile /></PrivateRoute>} />
                   <Route path="/feed"         element={<PrivateRoute><Feed /></PrivateRoute>} />
                   <Route path="/admin"        element={<AdminRoute><Dashboard /></AdminRoute>} />

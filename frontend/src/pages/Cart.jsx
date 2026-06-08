@@ -9,49 +9,14 @@ export default function Cart() {
   const { token } = useAuth()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
   const [error, setError] = useState(null)
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!token) {
       navigate('/login')
       return
     }
-    setLoading(true)
-    setError(null)
-    try {
-      // Comprar cada juego del carrito secuencialmente
-      const { purchaseGame } = await import('../api/purchases')
-      for (const game of cart) {
-        await purchaseGame(game.id)
-      }
-      clearCart()
-      setSuccess(true)
-    } catch (err) {
-      setError(err.response?.data?.message || 'Error al procesar la compra. Inténtalo de nuevo.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (success) {
-    return (
-      <div className="bg-vault-black min-h-screen font-mono flex items-center justify-center px-4">
-        <div className="text-center">
-          <div className="text-vault-green text-6xl mb-6" style={{ filter: 'drop-shadow(0 0 20px #39ff14)' }}>✓</div>
-          <h1 className="text-vault-green text-2xl font-bold tracking-widest mb-3">¡COMPRA COMPLETADA!</h1>
-          <p className="text-vault-muted text-sm mb-8 tracking-wide">Tus claves ya están disponibles en tu biblioteca.</p>
-          <div className="flex gap-4 justify-center">
-            <Link to="/profile" className="bg-vault-green hover:bg-vault-green-hover text-vault-black font-bold text-xs tracking-widest uppercase px-6 py-3 rounded transition-colors">
-              Ver mis claves
-            </Link>
-            <Link to="/" className="border border-vault-green-dark hover:border-vault-green text-vault-muted hover:text-vault-green text-xs tracking-widest uppercase px-6 py-3 rounded transition-colors">
-              Seguir comprando
-            </Link>
-          </div>
-        </div>
-      </div>
-    )
+    navigate('/checkout')
   }
 
   return (
@@ -95,9 +60,9 @@ export default function Cart() {
               {cart.map((game) => (
                 <div key={game.id} className="bg-vault-dark border border-vault-green-dark rounded-lg p-4 flex items-center gap-4 hover:border-vault-green transition-colors">
                   {/* Imagen */}
-                  <div className="w-16 h-16 bg-vault-card rounded border border-vault-green-dark flex items-center justify-center flex-shrink-0">
+                  <div className="w-16 h-16 bg-vault-card rounded border border-vault-green-dark flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {game.image_url
-                      ? <img src={game.image_url} alt={game.title} className="w-full h-full object-cover rounded" />
+                      ? <img src={game.image_url} alt={game.title} className="w-full h-full object-cover" />
                       : <span className="text-vault-hint text-xl font-bold">V</span>
                     }
                   </div>
@@ -193,13 +158,13 @@ export default function Cart() {
                   </div>
                 )}
 
-                {/* Botón de compra */}
+                {/* Botón ir a pagar */}
                 <button
                   onClick={handleCheckout}
                   disabled={loading}
                   className="w-full bg-vault-green hover:bg-vault-green-hover disabled:opacity-50 text-vault-black font-bold text-xs tracking-widest uppercase py-3 rounded transition-colors flex items-center justify-center gap-2"
                 >
-                  {loading ? <Spinner size="sm" text="" /> : '→ Completar compra'}
+                  {loading ? <Spinner size="sm" text="" /> : '→ Ir a pagar'}
                 </button>
 
                 {!token && (
