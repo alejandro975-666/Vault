@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import GameCard from '../components/ui/GameCard'
 import SearchBar from '../components/forms/SearchBar'
 import FilterSidebar from '../components/ui/FilterSidebar'
@@ -17,6 +18,13 @@ export default function Home() {
   const [games, setGames] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [searchParams] = useSearchParams()
+
+  // Leer parámetros de la URL al cargar (desde el footer)
+  useEffect(() => {
+    const sortParam = searchParams.get('sort')
+    if (sortParam) setSort(sortParam)
+  }, [])
 
   // Cargar juegos desde la API
   useEffect(() => {
@@ -301,6 +309,7 @@ export default function Home() {
                 <option value="price_desc">Precio: mayor</option>
                 <option value="rating">Mejor valorados</option>
                 <option value="newest">Más recientes</option>
+                <option value="discount">Mayores descuentos</option>
               </select>
             </div>
 
