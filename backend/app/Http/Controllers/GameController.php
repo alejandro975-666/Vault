@@ -48,9 +48,11 @@ class GameController extends Controller
 
         // Filtro por valoración mínima
         if ($request->filled('rating')) {
-            $query->havingRaw('AVG(reviews.rating) >= ?', [$request->rating]);
+            $query->whereHas('reviews', function ($q) use ($request) {
+                $q->havingRaw('AVG(rating) >= ?', [$request->rating])
+                  ->groupBy('game_id');
+            });
         }
-
         // Ordenación
         match ($request->get('sort', 'popular')) {
             'price_asc'  => $query->orderBy('price', 'asc'),
