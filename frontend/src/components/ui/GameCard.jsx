@@ -11,7 +11,7 @@ const platformColors = {
   'Battle.net': { bg: '#009ae4', color: '#ffffff' },
   EA:           { bg: '#000000', color: '#ffffff' },
   Ubisoft:      { bg: '#0070f3', color: '#ffffff' },
-  Nintendo:     { bg: '#e4000f', color: '#ffffff' },
+  Nintendo:     { bg: '#ffffff', color: '#e4000f' },
   Rockstar:     { bg: '#000000', color: '#fcaf17' },
 }
 
@@ -24,7 +24,7 @@ const platformLogos = {
   'Battle.net': 'https://cdn.simpleicons.org/battle.net/ffffff',
   EA:           'https://upload.wikimedia.org/wikipedia/commons/0/0d/Electronic-Arts-Logo.svg',
   Ubisoft:      'https://cdn.simpleicons.org/ubisoft/ffffff',
-  Nintendo:     'https://cdn.simpleicons.org/nintendoswitch/ffffff',
+  Nintendo:     'https://upload.wikimedia.org/wikipedia/commons/0/0d/Nintendo.svg',
   Rockstar:     'https://cdn.simpleicons.org/rockstargames/fcaf17'
 }
 export default function GameCard({ game }) {
