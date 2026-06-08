@@ -157,14 +157,44 @@ export default function Profile() {
         {/* BIBLIOTECA */}
         {activeTab === 'Biblioteca' && (
           <div>
-            <p className="text-vault-hint text-xs tracking-widest mb-6">{library.length} juegos en tu biblioteca</p>
+            <p className="text-vault-hint text-xs tracking-widests mb-6">{library.length} juegos en tu biblioteca</p>
             {library.length === 0 ? (
               <div className="text-center py-20">
                 <p className="text-vault-hint text-sm">Aún no tienes juegos. ¡Explora el catálogo!</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {library.map((game) => <GameCard key={game.id} game={game} />)}
+                {library.map((item) => (
+                  <div key={item.id} className="bg-vault-dark border border-vault-green-dark rounded-lg overflow-hidden flex flex-col hover:border-vault-green transition-colors">
+                    {/* Imagen */}
+                    <div className="h-36 bg-vault-card overflow-hidden relative">
+                      {item.image_url
+                        ? <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                        : <div className="w-full h-full flex items-center justify-center text-vault-hint text-4xl font-bold">V</div>
+                      }
+                      <div className="absolute top-2 right-2 bg-vault-green text-vault-black text-xs font-bold px-2 py-0.5 rounded tracking-widest">
+                        ✓ Tuyo
+                      </div>
+                     </div>
+                    {/* Info */}
+                    <div className="p-4 flex flex-col gap-2 flex-1 font-mono">
+                      <p className="text-vault-text text-sm font-bold truncate">{item.title}</p>
+                      <p className="text-vault-hint text-xs">{item.platform}</p>
+                      {/* Clave de activación */}
+                      <div className="bg-vault-card border border-vault-green-dark rounded px-3 py-2 mt-1">
+                        <p className="text-vault-hint text-xs tracking-widest uppercase mb-1">Clave</p>
+                        <p className="text-vault-green text-xs font-bold tracking-widest">{item.activation_key}</p>
+                      </div>
+                      {/* Precio pagado */}
+                      <div className="mt-auto pt-2 border-t border-vault-green-dark flex justify-between items-center">
+                        <span className="text-vault-hint text-xs tracking-widest uppercase">Pagado</span>
+                        <span className="text-vault-green font-bold text-sm">
+                          {item.price_paid ? parseFloat(item.price_paid).toFixed(2) + '€' : 'Gratis'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
