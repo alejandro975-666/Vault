@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useCart } from '../context/CartContext'
 import ReviewForm from '../components/forms/ReviewForm'
 import ReviewCard from '../components/ui/ReviewCard'
 import Spinner from '../components/ui/Spinner'
 import { getGame } from '../api/games'
-import { purchaseGame } from '../api/purchases'
+import { purchaseGame, getLibrary } from '../api/purchases'
 import { addToWishlist, removeFromWishlist, getWishlist } from '../api/wishlist'
 
 export default function GameDetail() {
   const { id } = useParams()
   const { user } = useAuth()
   const { addToCart, cart } = useCart()
+  const navigate = useNavigate()
 
   const [game, setGame] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -20,6 +21,8 @@ export default function GameDetail() {
   const [purchased, setPurchased] = useState(false)
   const [inWishlist, setInWishlist] = useState(false)
   const [purchasing, setPurchasing] = useState(false)
+  const [purchaseSuccess, setPurchaseSuccess] = useState(false)
+  const [activationKey, setActivationKey] = useState(null)
 
   const inCart = cart.some((g) => g.id === game?.id)
 
@@ -34,10 +37,18 @@ export default function GameDetail() {
   // Comprobar si ya está en biblioteca o wishlist
   useEffect(() => {
     if (!user) return
+
     getWishlist()
       .then((res) => {
-        const inList = res.data.some((g) => g.id === parseInt(id))
+        const inList = res.data.some((g) => g.id === id)
         setInWishlist(inList)
+      })
+      .catch(() => {})
+
+    getLibrary()
+      .then((res) => {
+        const owned = res.data.some((g) => g.id === id)
+        if (owned) setPurchased(true)
       })
       .catch(() => {})
   }, [user, id])
@@ -46,8 +57,10 @@ export default function GameDetail() {
     if (!user) return
     setPurchasing(true)
     try {
-      await purchaseGame(parseInt(id))
+      const res = await purchaseGame(id)
       setPurchased(true)
+      setPurchaseSuccess(true)
+      setActivationKey(res.data?.activation_key || null)
     } catch (err) {
       if (err.response?.status === 409) {
         setPurchased(true)
@@ -225,14 +238,36 @@ export default function GameDetail() {
                 </span>
               </div>
 
-              {/* Botones de acción */}
-              {purchased ? (
-                <div className="bg-vault-card border border-vault-green text-vault-green text-xs text-center py-3 rounded tracking-widest uppercase">
-                  ✓ En tu biblioteca
+              {/* Mensaje de compra exitosa con clave */}
+              {purchaseSuccess && activationKey && (
+                <div className="bg-vault-green/10 border border-vault-green rounded-lg p-4 flex flex-col gap-2">
+                  <p className="text-vault-green text-xs font-bold tracking-widest uppercase">✓ ¡Compra completada!</p>
+                  <p className="text-vault-hint text-xs">Tu clave de activación:</p>
+                  <p className="text-vault-green font-bold text-sm tracking-widest">{activationKey}</p>
+                  <button
+                    onClick={() => navigate('/profile')}
+                    className="mt-1 text-vault-black bg-vault-green hover:bg-vault-green-hover text-xs font-bold tracking-widest uppercase py-2 rounded transition-colors"
+                  >
+                    Ver en mi biblioteca →
+                  </button>
                 </div>
-              ) : (
+              )}
+
+              {/* Botones de acción */}
+              {purchased && !purchaseSuccess ? (
                 <div className="flex flex-col gap-2">
-                  {/* Comprar ahora */}
+                  <div className="bg-vault-card border border-vault-green text-vault-green text-xs text-center py-3 rounded tracking-widest uppercase">
+                    ✓ En tu biblioteca
+                  </div>
+                  <button
+                    onClick={() => navigate('/profile')}
+                    className="w-full border border-vault-green-dark hover:border-vault-green text-vault-muted hover:text-vault-green text-xs tracking-widest uppercase py-2.5 rounded transition-colors"
+                  >
+                    Ver en mi biblioteca →
+                  </button>
+                </div>
+              ) : !purchased ? (
+                <div className="flex flex-col gap-2">
                   <button
                     onClick={handlePurchase}
                     disabled={purchasing || !user}
@@ -241,7 +276,6 @@ export default function GameDetail() {
                     {!user ? 'Inicia sesión para comprar' : purchasing ? 'Procesando...' : 'Comprar ahora'}
                   </button>
 
-                  {/* Añadir al carrito */}
                   {user && parseFloat(price) > 0 && (
                     <button
                       onClick={() => addToCart(game)}
@@ -256,10 +290,10 @@ export default function GameDetail() {
                     </button>
                   )}
                 </div>
-              )}
+              ) : null}
 
               {/* Wishlist */}
-              {user && (
+              {user && !purchased && (
                 <button
                   onClick={toggleWishlist}
                   className={`w-full py-2.5 rounded tracking-widest uppercase text-xs transition-colors border ${
