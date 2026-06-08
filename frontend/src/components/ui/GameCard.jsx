@@ -24,7 +24,7 @@ const platformLogos = {
   'Battle.net': 'https://cdn.simpleicons.org/battle.net/ffffff',
   EA:           'https://upload.wikimedia.org/wikipedia/commons/0/0d/Electronic-Arts-Logo.svg',
   Ubisoft:      'https://cdn.simpleicons.org/ubisoft/ffffff',
-  Nintendo:     'https://upload.wikimedia.org/wikipedia/commons/0/0d/Nintendo.svg',
+  Nintendo:     'https://cdn.simpleicons.org/nintendo/ffffff',
   Rockstar:     'https://cdn.simpleicons.org/rockstargames/fcaf17'
 }
 export default function GameCard({ game }) {
