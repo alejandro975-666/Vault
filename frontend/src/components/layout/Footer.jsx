@@ -27,20 +27,9 @@ export default function Footer() {
               <span className="text-vault-muted text-xs tracking-widest uppercase">Tienda</span>
             </div>
             <div className="flex flex-col gap-2">
-              {[
-                { label: 'Catálogo',      to: '/' },
-                { label: 'Novedades',     to: '/?sort=newest' },
-                { label: 'Ofertas',       to: '/?sort=discount' },
-                { label: 'Más vendidos',  to: '/?sort=popular' },
-              ].map((link) => (
-                <Link
-                  key={link.label}
-                  to={link.to}
-                  className="text-vault-hint text-xs hover:text-vault-green transition-colors tracking-wide"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              <Link to="/" className="text-vault-hint text-xs hover:text-vault-green transition-colors tracking-wide">
+                Catálogo
+              </Link>
             </div>
           </div>
 
