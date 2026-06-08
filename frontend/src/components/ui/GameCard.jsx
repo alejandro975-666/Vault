@@ -5,7 +5,7 @@ import { useCart } from '../../context/CartContext'
 const platformColors = {
   Steam:        { bg: '#1b2838', color: '#c7d5e0' },
   Epic:         { bg: '#2a2a2a', color: '#ffffff' },
-  GOG:          { bg: '#2a2a2a', color: '#ffffff' },
+  GOG:          { bg: '#392069', color: '#ffffff' },
   Xbox:         { bg: '#ffffff', color: '#107c10' },
   PlayStation:  { bg: '#003087', color: '#ffffff' },
   'Battle.net': { bg: '#009ae4', color: '#ffffff' },
@@ -18,7 +18,7 @@ const platformColors = {
 const platformLogos = {
   Steam:        'https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg',
   Epic:         'https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg',
-  GOG:          'https://upload.wikimedia.org/wikipedia/commons/2/2e/GOG.com_logo.svg',
+  GOG:          'https://cdn.simpleicons.org/gog.com/ffffff',
   Xbox:         'https://upload.wikimedia.org/wikipedia/commons/f/f9/Xbox_one_logo.svg',
   PlayStation:  'https://upload.wikimedia.org/wikipedia/commons/4/4e/Playstation_logo_colour.svg',
   'Battle.net': 'https://cdn.simpleicons.org/battle.net/ffffff',
