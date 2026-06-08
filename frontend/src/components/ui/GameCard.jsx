@@ -3,19 +3,29 @@ import { Link } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
 
 const platformColors = {
-  Steam:       { bg: '#1b2838', color: '#c7d5e0' },
-  Epic:        { bg: '#2a2a2a', color: '#ffffff' },
-  GOG:         { bg: '#392069', color: '#ffffff' },
-  Xbox:        { bg: '#107c10', color: '#ffffff' },
-  PlayStation: { bg: '#003087', color: '#ffffff' },
+  Steam:          { bg: '#1b2838', color: '#c7d5e0' },
+  Epic:           { bg: '#2a2a2a', color: '#ffffff' },
+  GOG:            { bg: '#392069', color: '#ffffff' },
+  Xbox:           { bg: '#107c10', color: '#ffffff' },
+  PlayStation:    { bg: '#003087', color: '#ffffff' },
+  'Battle.net':   { bg: '#148eff', color: '#ffffff' },
+  EA:             { bg: '#ff4747', color: '#ffffff' },
+  Ubisoft:        { bg: '#0070f3', color: '#ffffff' },
+  Nintendo:       { bg: '#e4000f', color: '#ffffff' },
+  Rockstar:       { bg: '#fcaf17', color: '#000000' },
 }
 
 const platformLogos = {
-  Steam:       'https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg',
-  Epic:        'https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg',
-  GOG:         'https://upload.wikimedia.org/wikipedia/commons/2/2e/GOG.com_logo.svg',
-  Xbox:        'https://upload.wikimedia.org/wikipedia/commons/f/f9/Xbox_one_logo.svg',
-  PlayStation: 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Playstation_logo_colour.svg',
+  Steam:          'https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg',
+  Epic:           'https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg',
+  GOG:            'https://upload.wikimedia.org/wikipedia/commons/2/2e/GOG.com_logo.svg',
+  Xbox:           'https://upload.wikimedia.org/wikipedia/commons/f/f9/Xbox_one_logo.svg',
+  PlayStation:    'https://upload.wikimedia.org/wikipedia/commons/4/4e/Playstation_logo_colour.svg',
+  'Battle.net':   'https://upload.wikimedia.org/wikipedia/commons/b/be/Battle.net_icon.svg',
+  EA:             'https://upload.wikimedia.org/wikipedia/commons/0/0d/EA_logo.svg',
+  Ubisoft:        'https://upload.wikimedia.org/wikipedia/commons/7/7b/Ubisoft_logo.svg',
+  Nintendo:       'https://upload.wikimedia.org/wikipedia/commons/0/0d/Nintendo.svg',
+  Rockstar:       'https://upload.wikimedia.org/wikipedia/commons/0/08/Rockstar_Games_Logo.svg',
 }
 
 export default function GameCard({ game }) {
