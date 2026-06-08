@@ -4,9 +4,15 @@ import Spinner from '../../components/ui/Spinner'
 import { getGames, getCategories } from '../../api/games'
 import { createGame, updateGame, deleteGame } from '../../api/admin'
 
+const PLATFORMS = [
+  'Steam', 'Epic', 'GOG', 'Xbox', 'PlayStation',
+  'Battle.net', 'EA', 'Ubisoft', 'Nintendo', 'Rockstar'
+]
+
 const emptyForm = {
-  title: '', price: '', description: '', image_url: '',
-  platform: '', developer: '', status: 'draft', categories: []
+  title: '', price: '', original_price: '', discount: '',
+  description: '', image_url: '', platform: '',
+  developer: '', status: 'draft', categories: []
 }
 
 export default function ManageGames() {
@@ -41,14 +47,16 @@ export default function ManageGames() {
   const handleEdit = (game) => {
     setSelectedGame(game)
     setForm({
-      title: game.title,
-      price: game.price,
-      description: game.description || '',
-      image_url: game.image_url || '',
-      platform: game.platform || '',
-      developer: game.developer || '',
-      status: game.status,
-      categories: game.categories?.map((c) => c.id) || [],
+      title:          game.title,
+      price:          game.price,
+      original_price: game.original_price || '',
+      discount:       game.discount || '',
+      description:    game.description || '',
+      image_url:      game.image_url || '',
+      platform:       game.platform || '',
+      developer:      game.developer || '',
+      status:         game.status,
+      categories:     game.categories?.map((c) => c.id) || [],
     })
     setShowModal(true)
     setError(null)
@@ -150,7 +158,8 @@ export default function ManageGames() {
           <div className="grid grid-cols-12 gap-4 px-5 py-3 border-b border-vault-green-dark">
             <span className="col-span-4 text-vault-hint text-xs tracking-widest uppercase">Título</span>
             <span className="col-span-2 text-vault-hint text-xs tracking-widest uppercase">Categoría</span>
-            <span className="col-span-2 text-vault-hint text-xs tracking-widest uppercase">Precio</span>
+            <span className="col-span-1 text-vault-hint text-xs tracking-widest uppercase">Precio</span>
+            <span className="col-span-1 text-vault-hint text-xs tracking-widest uppercase">Desc.</span>
             <span className="col-span-2 text-vault-hint text-xs tracking-widest uppercase">Estado</span>
             <span className="col-span-2 text-vault-hint text-xs tracking-widest uppercase">Acciones</span>
           </div>
@@ -163,15 +172,26 @@ export default function ManageGames() {
               } hover:bg-vault-card transition-colors`}
             >
               <div className="col-span-4 flex items-center gap-3">
-                <div className="w-8 h-8 rounded bg-vault-card border border-vault-green-dark flex items-center justify-center text-xs font-bold text-vault-green flex-shrink-0">
-                  V
+                <div className="w-8 h-8 rounded bg-vault-card border border-vault-green-dark overflow-hidden flex-shrink-0">
+                  {game.image_url
+                    ? <img src={game.image_url} alt={game.title} className="w-full h-full object-cover" />
+                    : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-vault-green">V</div>
+                  }
                 </div>
                 <span className="text-vault-text text-sm font-bold truncate">{game.title}</span>
               </div>
               <span className="col-span-2 text-vault-muted text-xs truncate">
                 {game.categories?.map((c) => c.name).join(', ') || '—'}
               </span>
-              <span className="col-span-2 text-vault-text text-xs">{parseFloat(game.price).toFixed(2)}€</span>
+              <span className="col-span-1 text-vault-text text-xs">
+                {parseFloat(game.discount_price || game.price).toFixed(2)}€
+              </span>
+              <span className="col-span-1">
+                {game.discount > 0
+                  ? <span className="text-vault-green text-xs font-bold">-{game.discount}%</span>
+                  : <span className="text-vault-hint text-xs">—</span>
+                }
+              </span>
               <span className="col-span-2">
                 <span className={`text-xs px-2 py-1 rounded tracking-widest border ${
                   game.status === 'published'
@@ -199,7 +219,7 @@ export default function ManageGames() {
           ))}
 
           {filteredGames.length === 0 && (
-            <div className="px-5 py-10 text-center text-vault-hint text-xs tracking-widests">
+            <div className="px-5 py-10 text-center text-vault-hint text-xs tracking-widest">
               No se encontraron juegos
             </div>
           )}
@@ -226,6 +246,8 @@ export default function ManageGames() {
               )}
 
               <div className="flex flex-col gap-4">
+
+                {/* Título */}
                 <div>
                   <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Título</label>
                   <input
@@ -236,9 +258,19 @@ export default function ManageGames() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                {/* Precios */}
+                <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Precio (€)</label>
+                    <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Precio original (€)</label>
+                    <input
+                      type="number"
+                      value={form.original_price}
+                      onChange={(e) => setForm({ ...form, original_price: e.target.value })}
+                      className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Precio rebajado (€)</label>
                     <input
                       type="number"
                       value={form.price}
@@ -247,6 +279,21 @@ export default function ManageGames() {
                     />
                   </div>
                   <div>
+                    <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Descuento (%)</label>
+                    <input
+                      type="number"
+                      value={form.discount}
+                      onChange={(e) => setForm({ ...form, discount: e.target.value })}
+                      min="0"
+                      max="100"
+                      className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Plataforma y desarrollador */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
                     <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Plataforma</label>
                     <select
                       value={form.platform}
@@ -254,23 +301,23 @@ export default function ManageGames() {
                       className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
                     >
                       <option value="">Seleccionar...</option>
-                      {['Steam', 'Epic', 'GOG', 'Xbox', 'PlayStation'].map((p) => (
+                      {PLATFORMS.map((p) => (
                         <option key={p} value={p}>{p}</option>
                       ))}
                     </select>
                   </div>
+                  <div>
+                    <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Desarrollador</label>
+                    <input
+                      type="text"
+                      value={form.developer}
+                      onChange={(e) => setForm({ ...form, developer: e.target.value })}
+                      className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Desarrollador</label>
-                  <input
-                    type="text"
-                    value={form.developer}
-                    onChange={(e) => setForm({ ...form, developer: e.target.value })}
-                    className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
-                  />
-                </div>
-
+                {/* Descripción */}
                 <div>
                   <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Descripción</label>
                   <textarea
@@ -281,6 +328,7 @@ export default function ManageGames() {
                   />
                 </div>
 
+                {/* URL imagen */}
                 <div>
                   <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">URL de imagen</label>
                   <input
@@ -290,8 +338,12 @@ export default function ManageGames() {
                     placeholder="https://..."
                     className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
                   />
+                  {form.image_url && (
+                    <img src={form.image_url} alt="preview" className="mt-2 h-20 rounded border border-vault-green-dark object-cover" />
+                  )}
                 </div>
 
+                {/* Categorías */}
                 <div>
                   <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Categorías</label>
                   <div className="flex flex-wrap gap-2">
@@ -312,6 +364,7 @@ export default function ManageGames() {
                   </div>
                 </div>
 
+                {/* Estado */}
                 <div>
                   <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Estado</label>
                   <div className="flex gap-2">
