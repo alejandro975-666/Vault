@@ -16,16 +16,16 @@ const platformColors = {
 }
 
 const platformLogos = {
-  Steam:          'https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg',
-  Epic:           'https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg',
-  GOG:            'https://upload.wikimedia.org/wikipedia/commons/2/2e/GOG.com_logo.svg',
-  Xbox:           'https://upload.wikimedia.org/wikipedia/commons/f/f9/Xbox_one_logo.svg',
-  PlayStation:    'https://upload.wikimedia.org/wikipedia/commons/4/4e/Playstation_logo_colour.svg',
-  'Battle.net':   'https://upload.wikimedia.org/wikipedia/commons/b/be/Battle.net_icon.svg',
-  EA:             'https://upload.wikimedia.org/wikipedia/commons/0/0d/EA_logo.svg',
-  Ubisoft:        'https://upload.wikimedia.org/wikipedia/commons/7/7b/Ubisoft_logo.svg',
-  Nintendo:       'https://upload.wikimedia.org/wikipedia/commons/0/0d/Nintendo.svg',
-  Rockstar:       'https://upload.wikimedia.org/wikipedia/commons/0/08/Rockstar_Games_Logo.svg',
+  Steam:        'https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg',
+  Epic:         'https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg',
+  GOG:          'https://upload.wikimedia.org/wikipedia/commons/2/2e/GOG.com_logo.svg',
+  Xbox:         'https://upload.wikimedia.org/wikipedia/commons/f/f9/Xbox_one_logo.svg',
+  PlayStation:  'https://upload.wikimedia.org/wikipedia/commons/4/4e/Playstation_logo_colour.svg',
+  'Battle.net': 'https://upload.wikimedia.org/wikipedia/commons/b/be/Battle.net_icon.svg',
+  EA:           'https://upload.wikimedia.org/wikipedia/commons/0/0d/Electronic-Arts-Logo.svg',
+  Ubisoft:      'https://upload.wikimedia.org/wikipedia/commons/7/7b/Ubisoft_logo.svg',
+  Nintendo:     'https://upload.wikimedia.org/wikipedia/commons/0/0d/Nintendo.svg',
+  Rockstar:     'https://upload.wikimedia.org/wikipedia/commons/0/08/Rockstar_Games_Logo.svg',
 }
 
 export default function GameCard({ game }) {
