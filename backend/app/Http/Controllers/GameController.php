@@ -57,6 +57,7 @@ class GameController extends Controller
             'price_desc' => $query->orderBy('price', 'desc'),
             'rating'     => $query->orderByDesc('reviews_avg_rating'),
             'newest'     => $query->orderByDesc('release_date'),
+            'discount'   => $query->orderByDesc('discount'),
             default      => $query->orderByDesc('id'),
         };
 
