@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Game;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class GameController extends Controller
 {
@@ -13,6 +12,15 @@ class GameController extends Controller
         $query = Game::with(['categories', 'reviews'])
             ->withAvg('reviews', 'rating')
             ->where('status', 'published');
+
+        // Filtro por búsqueda de texto
+        if ($request->filled('query')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'LIKE', "%{$request->query}%")
+                  ->orWhere('description', 'LIKE', "%{$request->query}%")
+                  ->orWhere('developer', 'LIKE', "%{$request->query}%");
+            });
+        }
 
         // Filtro por categoría
         if ($request->filled('category')) {
