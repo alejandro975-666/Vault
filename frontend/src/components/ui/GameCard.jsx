@@ -12,7 +12,7 @@ const platformColors = {
   EA:           { bg: '#000000', color: '#ffffff' },
   Ubisoft:      { bg: '#0070f3', color: '#ffffff' },
   Nintendo:     { bg: '#e4000f', color: '#ffffff' },
-  Rockstar:     { bg: '#fcaf17', color: '#000000' },
+  Rockstar:     { bg: '#000000', color: '#fcaf17' },
 }
 
 const platformLogos = {
@@ -21,7 +21,7 @@ const platformLogos = {
   GOG:          'https://upload.wikimedia.org/wikipedia/commons/2/2e/GOG.com_logo.svg',
   Xbox:         'https://upload.wikimedia.org/wikipedia/commons/f/f9/Xbox_one_logo.svg',
   PlayStation:  'https://upload.wikimedia.org/wikipedia/commons/4/4e/Playstation_logo_colour.svg',
-  'Battle.net': 'https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt0f4e72f04c96dcce/battle-net-icon.svg',
+  'Battle.net': 'https://cdn.simpleicons.org/battle.net/ffffff',
   EA:           'https://upload.wikimedia.org/wikipedia/commons/0/0d/Electronic-Arts-Logo.svg',
   Ubisoft:      'https://cdn.simpleicons.org/ubisoft/ffffff',
   Nintendo:     'https://upload.wikimedia.org/wikipedia/commons/0/0d/Nintendo.svg',
