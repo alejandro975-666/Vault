@@ -15,10 +15,11 @@ class GameController extends Controller
 
         // Filtro por búsqueda de texto
         if ($request->filled('query')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('title', 'LIKE', "%{$request->query}%")
-                  ->orWhere('description', 'LIKE', "%{$request->query}%")
-                  ->orWhere('developer', 'LIKE', "%{$request->query}%");
+            $search = $request->get('query');
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'LIKE', "%{$search}%")
+                  ->orWhere('description', 'LIKE', "%{$search}%")
+                  ->orWhere('developer', 'LIKE', "%{$search}%");
             });
         }
 
