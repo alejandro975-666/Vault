@@ -21,7 +21,7 @@ const platformLogos = {
   GOG:          'https://upload.wikimedia.org/wikipedia/commons/2/2e/GOG.com_logo.svg',
   Xbox:         'https://upload.wikimedia.org/wikipedia/commons/f/f9/Xbox_one_logo.svg',
   PlayStation:  'https://upload.wikimedia.org/wikipedia/commons/4/4e/Playstation_logo_colour.svg',
-  'Battle.net': 'https://cdn.simpleicons.org/battlenet/148eff',
+  'Battle.net': 'https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt0f4e72f04c96dcce/battle-net-icon.svg',
   EA:           'https://upload.wikimedia.org/wikipedia/commons/0/0d/Electronic-Arts-Logo.svg',
   Ubisoft:      'https://cdn.simpleicons.org/ubisoft/ffffff',
   Nintendo:     'https://upload.wikimedia.org/wikipedia/commons/0/0d/Nintendo.svg',
