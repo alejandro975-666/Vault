@@ -111,7 +111,7 @@ export default function FilterSidebar({ filters, onChange }) {
           <span className="text-vault-muted text-xs tracking-widest uppercase">Plataforma</span>
         </div>
         <div className="flex flex-col gap-1">
-          {['Steam', 'Epic', 'GOG', 'Xbox', 'PlayStation'].map((platform) => {
+          {['Steam', 'Epic', 'GOG', 'Xbox', 'PlayStation', 'Battle.net', 'EA', 'Ubisoft', 'Nintendo', 'Rockstar'].map((platform) => {
             const active = filters.platform === platform
             return (
               <button
