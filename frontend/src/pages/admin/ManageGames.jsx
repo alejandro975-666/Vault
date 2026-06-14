@@ -10,7 +10,7 @@ const PLATFORMS = [
 ]
 
 const emptyForm = {
-  title: '', price: '', original_price: '', discount: '',
+  title: '', original_price: '', discount: '',
   description: '', image_url: '', platform: '',
   developer: '', status: 'draft', categories: []
 }
@@ -26,6 +26,13 @@ export default function ManageGames() {
   const [search, setSearch] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+
+  // Precio rebajado calculado automáticamente
+  const discountedPrice = form.original_price && form.discount
+    ? (parseFloat(form.original_price) * (1 - parseFloat(form.discount) / 100)).toFixed(2)
+    : form.original_price
+      ? parseFloat(form.original_price).toFixed(2)
+      : null
 
   useEffect(() => {
     Promise.all([
@@ -48,7 +55,6 @@ export default function ManageGames() {
     setSelectedGame(game)
     setForm({
       title:          game.title,
-      price:          game.price,
       original_price: game.original_price || '',
       discount:       game.discount || '',
       description:    game.description || '',
@@ -184,7 +190,7 @@ export default function ManageGames() {
                 {game.categories?.map((c) => c.name).join(', ') || '—'}
               </span>
               <span className="col-span-1 text-vault-text text-xs">
-                {parseFloat(game.discount_price || game.price).toFixed(2)}€
+                {parseFloat(game.discount_price || game.original_price).toFixed(2)}€
               </span>
               <span className="col-span-1">
                 {game.discount > 0
@@ -259,22 +265,13 @@ export default function ManageGames() {
                 </div>
 
                 {/* Precios */}
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Precio original (€)</label>
                     <input
                       type="number"
                       value={form.original_price}
                       onChange={(e) => setForm({ ...form, original_price: e.target.value })}
-                      className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Precio rebajado (€)</label>
-                    <input
-                      type="number"
-                      value={form.price}
-                      onChange={(e) => setForm({ ...form, price: e.target.value })}
                       className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
                     />
                   </div>
@@ -290,6 +287,26 @@ export default function ManageGames() {
                     />
                   </div>
                 </div>
+
+                {/* Preview precio calculado */}
+                {discountedPrice && (
+                  <div className="bg-vault-card border border-vault-green-dark rounded px-4 py-3 flex items-center justify-between">
+                    <span className="text-vault-hint text-xs tracking-widest uppercase">Precio final calculado</span>
+                    <div className="flex items-center gap-3">
+                      {form.discount > 0 && (
+                        <span className="text-vault-hint text-xs line-through">
+                          {parseFloat(form.original_price).toFixed(2)}€
+                        </span>
+                      )}
+                      <span className="text-vault-green font-bold text-sm">{discountedPrice}€</span>
+                      {form.discount > 0 && (
+                        <span className="bg-vault-green text-vault-black text-xs font-bold px-2 py-0.5 rounded">
+                          -{form.discount}%
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Plataforma y desarrollador */}
                 <div className="grid grid-cols-2 gap-4">
