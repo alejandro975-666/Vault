@@ -3,14 +3,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../hooks/useAuth'
 import Spinner from '../components/ui/Spinner'
-import api from '../api/axios'
 
 export default function Checkout() {
   const { cart, total, clearCart } = useCart()
   const { token } = useAuth()
   const navigate = useNavigate()
 
-  const [step, setStep] = useState(1) // 1: datos, 2: confirmación
+  const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [form, setForm] = useState({
@@ -20,12 +19,10 @@ export default function Checkout() {
     cvv:        '',
   })
 
-  // Formatear número de tarjeta con espacios cada 4 dígitos
   const formatCardNumber = (value) => {
     return value.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim()
   }
 
-  // Formatear fecha de expiración MM/YY
   const formatExpiry = (value) => {
     const clean = value.replace(/\D/g, '').slice(0, 4)
     if (clean.length >= 3) return clean.slice(0, 2) + '/' + clean.slice(2)
@@ -48,19 +45,16 @@ export default function Checkout() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (cart.length === 0) return
+
     setLoading(true)
     setError(null)
-    try {
-      await api.post('/cart/checkout', {
-        game_ids: cart.map((g) => g.id)
-      })
-      clearCart()
-      setStep(2)
-    } catch (err) {
-      setError(err.response?.data?.message || 'Error al procesar el pago. Inténtalo de nuevo.')
-    } finally {
-      setLoading(false)
-    }
+
+    // Simulamos una espera de 2 segundos como si procesara el pago
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    clearCart()
+    setLoading(false)
+    setStep(2)
   }
 
   // Pantalla de confirmación
