@@ -38,10 +38,10 @@ class GameController extends Controller
         // Filtro por precio
         if ($request->filled('price')) {
             match ($request->price) {
-                'free'    => $query->where('price', 0),
-                'under10' => $query->where('price', '<', 10)->where('price', '>', 0),
-                '10to30'  => $query->whereBetween('price', [10, 30]),
-                'over30'  => $query->where('price', '>', 30),
+                'free'    => $query->where('original_price', 0),
+                'under10' => $query->where('original_price', '<', 10)->where('original_price', '>', 0),
+                '10to30'  => $query->whereBetween('original_price', [10, 30]),
+                'over30'  => $query->where('original_price', '>', 30),
                 default   => null,
             };
         }
@@ -55,10 +55,11 @@ class GameController extends Controller
                   ->havingRaw('AVG(rating) >= ?', [$request->rating]);
             });
         }
+
         // Ordenación
         match ($request->get('sort', 'popular')) {
-            'price_asc'  => $query->orderBy('price', 'asc'),
-            'price_desc' => $query->orderBy('price', 'desc'),
+            'price_asc'  => $query->orderBy('original_price', 'asc'),
+            'price_desc' => $query->orderBy('original_price', 'desc'),
             'rating'     => $query->orderByDesc('reviews_avg_rating'),
             'newest'     => $query->orderByDesc('release_date'),
             'discount'   => $query->orderByDesc('discount'),
@@ -83,8 +84,7 @@ class GameController extends Controller
             'developer'      => 'nullable|string|max:255',
             'publisher'      => 'nullable|string|max:255',
             'release_date'   => 'nullable|date',
-            'price'          => 'required|numeric|min:0',
-            'original_price' => 'nullable|numeric|min:0',
+            'original_price' => 'required|numeric|min:0',
             'discount'       => 'nullable|integer|min:0|max:100',
             'image_url'      => 'nullable|url',
             'platform'       => 'nullable|string',
@@ -92,7 +92,14 @@ class GameController extends Controller
             'status'         => 'in:draft,published',
             'categories'     => 'nullable|array',
             'categories.*'   => 'exists:categories,id',
+            'admin_id'       => 'nullable|string',
         ]);
+
+        // Calcular discount_price automáticamente
+        $discount = $data['discount'] ?? 0;
+        $data['discount_price'] = $discount > 0
+            ? round($data['original_price'] * (1 - $discount / 100), 2)
+            : $data['original_price'];
 
         $game = Game::create($data);
 
@@ -111,8 +118,7 @@ class GameController extends Controller
             'developer'      => 'nullable|string|max:255',
             'publisher'      => 'nullable|string|max:255',
             'release_date'   => 'nullable|date',
-            'price'          => 'sometimes|numeric|min:0',
-            'original_price' => 'nullable|numeric|min:0',
+            'original_price' => 'sometimes|numeric|min:0',
             'discount'       => 'nullable|integer|min:0|max:100',
             'image_url'      => 'nullable|url',
             'platform'       => 'nullable|string',
@@ -121,6 +127,13 @@ class GameController extends Controller
             'categories'     => 'nullable|array',
             'categories.*'   => 'exists:categories,id',
         ]);
+
+        // Recalcular discount_price automáticamente
+        $originalPrice = $data['original_price'] ?? $game->original_price;
+        $discount      = $data['discount'] ?? $game->discount ?? 0;
+        $data['discount_price'] = $discount > 0
+            ? round($originalPrice * (1 - $discount / 100), 2)
+            : $originalPrice;
 
         $game->update($data);
 
@@ -139,15 +152,15 @@ class GameController extends Controller
 
     public function search(Request $request)
     {
-        $query = $request->validate(['query' => 'required|string|min:2'])['query'];
+        $search = $request->validate(['query' => 'required|string|min:2'])['query'];
 
         $games = Game::with(['categories'])
             ->withAvg('reviews', 'rating')
             ->where('status', 'published')
-            ->where(function ($q) use ($query) {
-                $q->where('title', 'LIKE', "%{$query}%")
-                  ->orWhere('description', 'LIKE', "%{$query}%")
-                  ->orWhere('developer', 'LIKE', "%{$query}%");
+            ->where(function ($q) use ($search) {
+                $q->where('title', 'LIKE', "%{$search}%")
+                  ->orWhere('description', 'LIKE', "%{$search}%")
+                  ->orWhere('developer', 'LIKE', "%{$search}%");
             })
             ->limit(20)
             ->get();
