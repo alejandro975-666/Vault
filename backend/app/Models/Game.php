@@ -69,11 +69,10 @@ class Game extends Model
 
     public function getDiscountPriceAttribute($value)
     {
-        if ($value) return $value;
         if ($this->discount > 0) {
-            return round($this->price * (1 - $this->discount / 100), 2);
+            return round($this->original_price * (1 - $this->discount / 100), 2);
         }
-        return $this->price;
+        return $this->original_price;
     }
 
     public function getOriginalPriceAttribute($value)
