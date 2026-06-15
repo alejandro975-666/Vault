@@ -73,15 +73,17 @@ class AuthController extends Controller
     public function updateProfile(Request $request)
     {
         $user = $request->user();
- 
+    
         $data = $request->validate([
-            'name'  => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'name'    => 'required|string|max:255',
+            'alias'   => 'nullable|string|max:50',
+            'bio'     => 'nullable|string|max:500',
+            'country' => 'nullable|string|max:100',
+            'email'   => 'required|email|unique:users,email,' . $user->id,
         ]);
- 
+    
         $user->update($data);
- 
-        // Actualizar localStorage en el frontend
+    
         return response()->json($user);
     }
  
