@@ -11,7 +11,7 @@ const PLATFORMS = [
 
 const emptyForm = {
   title: '', original_price: '', discount: '',
-  description: '', image_url: '', images: [],
+  description: '', image_url: '', images: ['', ''],
   trailer_url: '', platform: '', developer: '',
   status: 'draft', categories: []
 }
@@ -30,26 +30,16 @@ export default function ManageGames() {
 
   const discountedPrice = form.original_price && form.discount
     ? (parseFloat(form.original_price) * (1 - parseFloat(form.discount) / 100)).toFixed(2)
-    : form.original_price
-      ? parseFloat(form.original_price).toFixed(2)
-      : null
+    : form.original_price ? parseFloat(form.original_price).toFixed(2) : null
 
   useEffect(() => {
-    Promise.all([
-      getGames({ status: 'all' }),
-      getCategories(),
-    ])
-      .then(([gamesRes, catsRes]) => {
-        setGames(gamesRes.data)
-        setCategories(catsRes.data)
-      })
+    Promise.all([getGames({ status: 'all' }), getCategories()])
+      .then(([gamesRes, catsRes]) => { setGames(gamesRes.data); setCategories(catsRes.data) })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])
 
-  const filteredGames = games.filter((g) =>
-    g.title.toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredGames = games.filter((g) => g.title.toLowerCase().includes(search.toLowerCase()))
 
   const handleEdit = (game) => {
     setSelectedGame(game)
@@ -59,7 +49,7 @@ export default function ManageGames() {
       discount:       game.discount || '',
       description:    game.description || '',
       image_url:      game.image_url || '',
-      images:         Array.isArray(game.images) ? game.images : [],
+      images:         Array.isArray(game.images) && game.images.length > 0 ? game.images : ['', ''],
       trailer_url:    game.trailer_url || '',
       platform:       game.platform || '',
       developer:      game.developer || '',
@@ -70,22 +60,21 @@ export default function ManageGames() {
     setError(null)
   }
 
-  const handleNew = () => {
-    setSelectedGame(null)
-    setForm(emptyForm)
-    setShowModal(true)
-    setError(null)
-  }
+  const handleNew = () => { setSelectedGame(null); setForm(emptyForm); setShowModal(true); setError(null) }
 
   const handleSave = async () => {
     setSaving(true)
     setError(null)
     try {
+      const payload = {
+        ...form,
+        images: form.images.filter(url => url.trim() !== '')
+      }
       if (selectedGame) {
-        const res = await updateGame(selectedGame.id, form)
+        const res = await updateGame(selectedGame.id, payload)
         setGames((prev) => prev.map((g) => g.id === selectedGame.id ? res.data : g))
       } else {
-        const res = await createGame(form)
+        const res = await createGame(payload)
         setGames((prev) => [res.data, ...prev])
       }
       setShowModal(false)
@@ -96,19 +85,14 @@ export default function ManageGames() {
     }
   }
 
-  const handleDeleteConfirm = (game) => {
-    setSelectedGame(game)
-    setShowDeleteModal(true)
-  }
+  const handleDeleteConfirm = (game) => { setSelectedGame(game); setShowDeleteModal(true) }
 
   const handleDelete = async () => {
     try {
       await deleteGame(selectedGame.id)
       setGames((prev) => prev.filter((g) => g.id !== selectedGame.id))
       setShowDeleteModal(false)
-    } catch (err) {
-      console.error(err)
-    }
+    } catch (err) { console.error(err) }
   }
 
   const toggleCategory = (catId) => {
@@ -120,13 +104,20 @@ export default function ManageGames() {
     }))
   }
 
-  if (loading) {
-    return (
-      <div className="bg-vault-black min-h-screen flex items-center justify-center">
-        <Spinner text="Cargando juegos..." />
-      </div>
-    )
+  const updateImage = (index, value) => {
+    const updated = [...form.images]
+    updated[index] = value
+    setForm({ ...form, images: updated })
   }
+
+  const addImage = () => setForm({ ...form, images: [...form.images, ''] })
+
+  const removeImage = (index) => {
+    const updated = form.images.filter((_, i) => i !== index)
+    setForm({ ...form, images: updated })
+  }
+
+  if (loading) return <div className="bg-vault-black min-h-screen flex items-center justify-center"><Spinner text="Cargando juegos..." /></div>
 
   return (
     <div className="bg-vault-black min-h-screen font-mono">
@@ -142,23 +133,15 @@ export default function ManageGames() {
             </div>
             <h1 className="text-vault-green text-2xl font-bold tracking-widest uppercase">Gestión de juegos</h1>
           </div>
-          <button
-            onClick={handleNew}
-            className="bg-vault-green hover:bg-vault-green-hover text-vault-black font-bold text-xs tracking-widest uppercase px-5 py-2.5 rounded transition-colors"
-          >
+          <button onClick={handleNew} className="bg-vault-green hover:bg-vault-green-hover text-vault-black font-bold text-xs tracking-widest uppercase px-5 py-2.5 rounded transition-colors">
             + Nuevo juego
           </button>
         </div>
 
         {/* Buscador */}
         <div className="mb-6">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar juego..."
-            className="w-full max-w-sm bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
-          />
+          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar juego..."
+            className="w-full max-w-sm bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono" />
         </div>
 
         {/* Tabla */}
@@ -173,64 +156,31 @@ export default function ManageGames() {
           </div>
 
           {filteredGames.map((game, i) => (
-            <div
-              key={game.id}
-              className={`grid grid-cols-12 gap-4 px-5 py-4 items-center ${
-                i < filteredGames.length - 1 ? 'border-b border-vault-green-dark' : ''
-              } hover:bg-vault-card transition-colors`}
-            >
+            <div key={game.id} className={`grid grid-cols-12 gap-4 px-5 py-4 items-center ${i < filteredGames.length - 1 ? 'border-b border-vault-green-dark' : ''} hover:bg-vault-card transition-colors`}>
               <div className="col-span-4 flex items-center gap-3">
                 <div className="w-8 h-8 rounded bg-vault-card border border-vault-green-dark overflow-hidden flex-shrink-0">
-                  {game.image_url
-                    ? <img src={game.image_url} alt={game.title} className="w-full h-full object-cover" />
-                    : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-vault-green">V</div>
-                  }
+                  {game.image_url ? <img src={game.image_url} alt={game.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-vault-green">V</div>}
                 </div>
                 <span className="text-vault-text text-sm font-bold truncate">{game.title}</span>
               </div>
-              <span className="col-span-2 text-vault-muted text-xs truncate">
-                {game.categories?.map((c) => c.name).join(', ') || '—'}
-              </span>
-              <span className="col-span-1 text-vault-text text-xs">
-                {parseFloat(game.discount_price || game.original_price).toFixed(2)}€
-              </span>
+              <span className="col-span-2 text-vault-muted text-xs truncate">{game.categories?.map((c) => c.name).join(', ') || '—'}</span>
+              <span className="col-span-1 text-vault-text text-xs">{parseFloat(game.discount_price || game.original_price).toFixed(2)}€</span>
               <span className="col-span-1">
-                {game.discount > 0
-                  ? <span className="text-vault-green text-xs font-bold">-{game.discount}%</span>
-                  : <span className="text-vault-hint text-xs">—</span>
-                }
+                {game.discount > 0 ? <span className="text-vault-green text-xs font-bold">-{game.discount}%</span> : <span className="text-vault-hint text-xs">—</span>}
               </span>
               <span className="col-span-2">
-                <span className={`text-xs px-2 py-1 rounded tracking-widest border ${
-                  game.status === 'published'
-                    ? 'bg-vault-green/10 border-vault-green-dark text-vault-green'
-                    : 'bg-vault-card border-vault-hint text-vault-hint'
-                }`}>
+                <span className={`text-xs px-2 py-1 rounded tracking-widest border ${game.status === 'published' ? 'bg-vault-green/10 border-vault-green-dark text-vault-green' : 'bg-vault-card border-vault-hint text-vault-hint'}`}>
                   {game.status === 'published' ? 'Publicado' : 'Borrador'}
                 </span>
               </span>
               <div className="col-span-2 flex gap-2">
-                <button
-                  onClick={() => handleEdit(game)}
-                  className="text-vault-muted hover:text-vault-green text-xs tracking-widest uppercase transition-colors border border-vault-green-dark hover:border-vault-green px-3 py-1.5 rounded"
-                >
-                  Editar
-                </button>
-                <button
-                  onClick={() => handleDeleteConfirm(game)}
-                  className="text-vault-error text-xs tracking-widest uppercase transition-colors border border-vault-error/30 hover:border-vault-error px-3 py-1.5 rounded"
-                >
-                  Borrar
-                </button>
+                <button onClick={() => handleEdit(game)} className="text-vault-muted hover:text-vault-green text-xs tracking-widest uppercase transition-colors border border-vault-green-dark hover:border-vault-green px-3 py-1.5 rounded">Editar</button>
+                <button onClick={() => handleDeleteConfirm(game)} className="text-vault-error text-xs tracking-widest uppercase transition-colors border border-vault-error/30 hover:border-vault-error px-3 py-1.5 rounded">Borrar</button>
               </div>
             </div>
           ))}
 
-          {filteredGames.length === 0 && (
-            <div className="px-5 py-10 text-center text-vault-hint text-xs tracking-widest">
-              No se encontraron juegos
-            </div>
-          )}
+          {filteredGames.length === 0 && <div className="px-5 py-10 text-center text-vault-hint text-xs tracking-widest">No se encontraron juegos</div>}
         </div>
 
         {/* Modal crear/editar */}
@@ -240,72 +190,44 @@ export default function ManageGames() {
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-vault-green"></div>
-                  <span className="text-vault-muted text-xs tracking-widest uppercase">
-                    {selectedGame ? 'Editar juego' : 'Nuevo juego'}
-                  </span>
+                  <span className="text-vault-muted text-xs tracking-widest uppercase">{selectedGame ? 'Editar juego' : 'Nuevo juego'}</span>
                 </div>
                 <button onClick={() => setShowModal(false)} className="text-vault-hint hover:text-vault-error transition-colors text-lg">✕</button>
               </div>
 
-              {error && (
-                <div className="border border-vault-error/40 bg-vault-error/10 text-vault-error rounded px-4 py-3 mb-4 text-xs">
-                  ⚠ {error}
-                </div>
-              )}
+              {error && <div className="border border-vault-error/40 bg-vault-error/10 text-vault-error rounded px-4 py-3 mb-4 text-xs">⚠ {error}</div>}
 
               <div className="flex flex-col gap-4">
 
                 {/* Título */}
                 <div>
                   <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Título</label>
-                  <input
-                    type="text"
-                    value={form.title}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
-                  />
+                  <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
+                    className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono" />
                 </div>
 
                 {/* Precios */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Precio original (€)</label>
-                    <input
-                      type="number"
-                      value={form.original_price}
-                      onChange={(e) => setForm({ ...form, original_price: e.target.value })}
-                      className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
-                    />
+                    <input type="number" value={form.original_price} onChange={(e) => setForm({ ...form, original_price: e.target.value })}
+                      className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono" />
                   </div>
                   <div>
                     <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Descuento (%)</label>
-                    <input
-                      type="number"
-                      value={form.discount}
-                      onChange={(e) => setForm({ ...form, discount: e.target.value })}
-                      min="0"
-                      max="100"
-                      className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
-                    />
+                    <input type="number" value={form.discount} onChange={(e) => setForm({ ...form, discount: e.target.value })} min="0" max="100"
+                      className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono" />
                   </div>
                 </div>
 
-                {/* Preview precio calculado */}
+                {/* Preview precio */}
                 {discountedPrice && (
                   <div className="bg-vault-card border border-vault-green-dark rounded px-4 py-3 flex items-center justify-between">
                     <span className="text-vault-hint text-xs tracking-widest uppercase">Precio final calculado</span>
                     <div className="flex items-center gap-3">
-                      {form.discount > 0 && (
-                        <span className="text-vault-hint text-xs line-through">
-                          {parseFloat(form.original_price).toFixed(2)}€
-                        </span>
-                      )}
+                      {form.discount > 0 && <span className="text-vault-hint text-xs line-through">{parseFloat(form.original_price).toFixed(2)}€</span>}
                       <span className="text-vault-green font-bold text-sm">{discountedPrice}€</span>
-                      {form.discount > 0 && (
-                        <span className="bg-vault-green text-vault-black text-xs font-bold px-2 py-0.5 rounded">
-                          -{form.discount}%
-                        </span>
-                      )}
+                      {form.discount > 0 && <span className="bg-vault-green text-vault-black text-xs font-bold px-2 py-0.5 rounded">-{form.discount}%</span>}
                     </div>
                   </div>
                 )}
@@ -314,84 +236,70 @@ export default function ManageGames() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Plataforma</label>
-                    <select
-                      value={form.platform}
-                      onChange={(e) => setForm({ ...form, platform: e.target.value })}
-                      className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
-                    >
+                    <select value={form.platform} onChange={(e) => setForm({ ...form, platform: e.target.value })}
+                      className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono">
                       <option value="">Seleccionar...</option>
-                      {PLATFORMS.map((p) => (
-                        <option key={p} value={p}>{p}</option>
-                      ))}
+                      {PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
                     </select>
                   </div>
                   <div>
                     <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Desarrollador</label>
-                    <input
-                      type="text"
-                      value={form.developer}
-                      onChange={(e) => setForm({ ...form, developer: e.target.value })}
-                      className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
-                    />
+                    <input type="text" value={form.developer} onChange={(e) => setForm({ ...form, developer: e.target.value })}
+                      className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono" />
                   </div>
                 </div>
 
                 {/* Descripción */}
                 <div>
                   <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Descripción</label>
-                  <textarea
-                    value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    rows={3}
-                    className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono resize-none"
-                  />
+                  <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3}
+                    className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono resize-none" />
                 </div>
 
-                {/* URL imagen principal */}
+                {/* Imagen principal */}
                 <div>
                   <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">URL de imagen principal</label>
-                  <input
-                    type="text"
-                    value={form.image_url}
-                    onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-                    placeholder="https://..."
-                    className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono"
-                  />
+                  <input type="text" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..."
+                    className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono" />
                   {form.image_url && (
-                    <img src={form.image_url} alt="preview" className="mt-2 h-20 rounded border border-vault-green-dark object-cover" />
+                    <img src={form.image_url} alt="preview" className="mt-2 h-16 w-full rounded border border-vault-green-dark object-contain" style={{ background: '#0a0c0a' }} />
                   )}
-                </div>
-
-                {/* Imágenes adicionales */}
-                <div>
-                  <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">
-                    Imágenes adicionales (una URL por línea)
-                  </label>
-                  <textarea
-                    value={Array.isArray(form.images) ? form.images.join('\n') : ''}
-                    onChange={(e) => setForm({
-                      ...form,
-                      images: e.target.value.split('\n').filter(url => url.trim() !== '')
-                    })}
-                    rows={3}
-                    placeholder={'https://imagen1.jpg\nhttps://imagen2.jpg\nhttps://imagen3.jpg'}
-                    className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono resize-none placeholder-vault-hint"
-                  />
-                  <p className="text-vault-hint text-xs mt-1">Una URL por línea</p>
                 </div>
 
                 {/* Trailer */}
                 <div>
-                  <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">
-                    URL del trailer (YouTube)
-                  </label>
-                  <input
-                    type="text"
-                    value={form.trailer_url}
-                    onChange={(e) => setForm({ ...form, trailer_url: e.target.value })}
+                  <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">URL del trailer (YouTube)</label>
+                  <input type="text" value={form.trailer_url} onChange={(e) => setForm({ ...form, trailer_url: e.target.value })}
                     placeholder="https://www.youtube.com/watch?v=..."
-                    className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono placeholder-vault-hint"
-                  />
+                    className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono placeholder-vault-hint" />
+                </div>
+
+                {/* Imágenes adicionales */}
+                <div>
+                  <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Imágenes adicionales</label>
+                  <div className="flex flex-col gap-2">
+                    {form.images.map((url, i) => (
+                      <div key={i} className="flex gap-2 items-center">
+                        <input
+                          type="text"
+                          value={url}
+                          onChange={(e) => updateImage(i, e.target.value)}
+                          placeholder={`https://imagen${i + 1}.jpg`}
+                          className="flex-1 bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono placeholder-vault-hint"
+                        />
+                        {form.images.length > 2 && (
+                          <button type="button" onClick={() => removeImage(i)}
+                            className="text-vault-hint hover:text-vault-error transition-colors text-lg flex-shrink-0">
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <button type="button" onClick={addImage}
+                    className="mt-2 text-vault-hint hover:text-vault-green text-xs tracking-widest uppercase transition-colors border border-vault-green-dark hover:border-vault-green px-4 py-2 rounded">
+                    + Añadir imagen
+                  </button>
                 </div>
 
                 {/* Categorías */}
@@ -399,16 +307,10 @@ export default function ManageGames() {
                   <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Categorías</label>
                   <div className="flex flex-wrap gap-2">
                     {categories.map((cat) => (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => toggleCategory(cat.id)}
+                      <button key={cat.id} type="button" onClick={() => toggleCategory(cat.id)}
                         className={`px-3 py-1.5 rounded text-xs tracking-widest uppercase border transition-colors ${
-                          form.categories.includes(cat.id)
-                            ? 'bg-vault-green text-vault-black border-vault-green font-bold'
-                            : 'border-vault-green-dark text-vault-hint hover:border-vault-green'
-                        }`}
-                      >
+                          form.categories.includes(cat.id) ? 'bg-vault-green text-vault-black border-vault-green font-bold' : 'border-vault-green-dark text-vault-hint hover:border-vault-green'
+                        }`}>
                         {cat.name}
                       </button>
                     ))}
@@ -420,15 +322,10 @@ export default function ManageGames() {
                   <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">Estado</label>
                   <div className="flex gap-2">
                     {['draft', 'published'].map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => setForm({ ...form, status: s })}
+                      <button key={s} onClick={() => setForm({ ...form, status: s })}
                         className={`px-4 py-2 rounded text-xs tracking-widest uppercase border transition-colors ${
-                          form.status === s
-                            ? 'bg-vault-green text-vault-black border-vault-green font-bold'
-                            : 'border-vault-green-dark text-vault-hint hover:border-vault-green'
-                        }`}
-                      >
+                          form.status === s ? 'bg-vault-green text-vault-black border-vault-green font-bold' : 'border-vault-green-dark text-vault-hint hover:border-vault-green'
+                        }`}>
                         {s === 'draft' ? 'Borrador' : 'Publicado'}
                       </button>
                     ))}
@@ -437,17 +334,10 @@ export default function ManageGames() {
               </div>
 
               <div className="flex gap-3 mt-6 justify-end">
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="border border-vault-green-dark text-vault-hint hover:text-vault-muted text-xs tracking-widest uppercase px-5 py-2.5 rounded transition-colors"
-                >
+                <button onClick={() => setShowModal(false)} className="border border-vault-green-dark text-vault-hint hover:text-vault-muted text-xs tracking-widest uppercase px-5 py-2.5 rounded transition-colors">
                   Cancelar
                 </button>
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="bg-vault-green hover:bg-vault-green-hover disabled:opacity-40 text-vault-black font-bold text-xs tracking-widest uppercase px-5 py-2.5 rounded transition-colors"
-                >
+                <button onClick={handleSave} disabled={saving} className="bg-vault-green hover:bg-vault-green-hover disabled:opacity-40 text-vault-black font-bold text-xs tracking-widest uppercase px-5 py-2.5 rounded transition-colors">
                   {saving ? 'Guardando...' : selectedGame ? 'Guardar cambios' : 'Crear juego'}
                 </button>
               </div>
@@ -463,23 +353,11 @@ export default function ManageGames() {
                 <div className="w-1.5 h-1.5 rounded-full bg-vault-error"></div>
                 <span className="text-vault-error text-xs tracking-widest uppercase">Confirmar eliminación</span>
               </div>
-              <p className="text-vault-text text-sm mb-2">
-                ¿Eliminar <span className="text-vault-green font-bold">{selectedGame?.title}</span>?
-              </p>
+              <p className="text-vault-text text-sm mb-2">¿Eliminar <span className="text-vault-green font-bold">{selectedGame?.title}</span>?</p>
               <p className="text-vault-hint text-xs mb-6">Esta acción no se puede deshacer.</p>
               <div className="flex gap-3 justify-end">
-                <button
-                  onClick={() => setShowDeleteModal(false)}
-                  className="border border-vault-green-dark text-vault-hint text-xs tracking-widest uppercase px-5 py-2.5 rounded transition-colors hover:text-vault-muted"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="bg-vault-error hover:bg-red-600 text-white font-bold text-xs tracking-widest uppercase px-5 py-2.5 rounded transition-colors"
-                >
-                  Eliminar
-                </button>
+                <button onClick={() => setShowDeleteModal(false)} className="border border-vault-green-dark text-vault-hint text-xs tracking-widest uppercase px-5 py-2.5 rounded transition-colors hover:text-vault-muted">Cancelar</button>
+                <button onClick={handleDelete} className="bg-vault-error hover:bg-red-600 text-white font-bold text-xs tracking-widest uppercase px-5 py-2.5 rounded transition-colors">Eliminar</button>
               </div>
             </div>
           </div>
