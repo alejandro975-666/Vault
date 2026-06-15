@@ -9,7 +9,6 @@ import { getGame } from '../api/games'
 import { purchaseGame, getLibrary } from '../api/purchases'
 import { addToWishlist, removeFromWishlist, getWishlist } from '../api/wishlist'
 
-// Extrae el ID de YouTube de cualquier formato de URL
 const getYouTubeId = (url) => {
   if (!url) return null
   const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/)
@@ -30,7 +29,7 @@ export default function GameDetail() {
   const [purchasing, setPurchasing] = useState(false)
   const [purchaseSuccess, setPurchaseSuccess] = useState(false)
   const [activationKey, setActivationKey] = useState(null)
-  const [activeMedia, setActiveMedia] = useState(null) // null = imagen principal, 'trailer' = trailer, número = índice imagen adicional
+  const [activeMedia, setActiveMedia] = useState(null)
 
   const inCart = cart.some((g) => g.id === game?.id)
 
@@ -45,16 +44,10 @@ export default function GameDetail() {
   useEffect(() => {
     if (!user) return
     getWishlist()
-      .then((res) => {
-        const inList = res.data.some((g) => g.id === id)
-        setInWishlist(inList)
-      })
+      .then((res) => setInWishlist(res.data.some((g) => g.id === id)))
       .catch(() => {})
     getLibrary()
-      .then((res) => {
-        const owned = res.data.some((g) => g.id === id)
-        if (owned) setPurchased(true)
-      })
+      .then((res) => { if (res.data.some((g) => g.id === id)) setPurchased(true) })
       .catch(() => {})
   }, [user, id])
 
@@ -76,56 +69,30 @@ export default function GameDetail() {
   const toggleWishlist = async () => {
     if (!user) return
     try {
-      if (inWishlist) {
-        await removeFromWishlist(game.id)
-        setInWishlist(false)
-      } else {
-        await addToWishlist(game.id)
-        setInWishlist(true)
-      }
-    } catch (err) {
-      console.error(err)
-    }
+      if (inWishlist) { await removeFromWishlist(game.id); setInWishlist(false) }
+      else            { await addToWishlist(game.id);    setInWishlist(true)  }
+    } catch (err) { console.error(err) }
   }
 
-  const handleReviewAdded = () => {
-    getGame(id).then((res) => setGame(res.data))
-  }
+  const handleReviewAdded = () => getGame(id).then((res) => setGame(res.data))
 
-  if (loading) {
-    return (
-      <div className="bg-vault-black min-h-screen flex items-center justify-center">
-        <Spinner text="Cargando juego..." />
+  if (loading) return <div className="bg-vault-black min-h-screen flex items-center justify-center"><Spinner text="Cargando juego..." /></div>
+
+  if (error || !game) return (
+    <div className="bg-vault-black min-h-screen flex items-center justify-center font-mono">
+      <div className="text-center">
+        <p className="text-vault-error text-sm mb-4">⚠ No se pudo cargar el juego</p>
+        <Link to="/" className="text-vault-green text-xs tracking-widest uppercase hover:text-vault-green-hover">← Volver al catálogo</Link>
       </div>
-    )
-  }
+    </div>
+  )
 
-  if (error || !game) {
-    return (
-      <div className="bg-vault-black min-h-screen flex items-center justify-center font-mono">
-        <div className="text-center">
-          <p className="text-vault-error text-sm mb-4">⚠ No se pudo cargar el juego</p>
-          <Link to="/" className="text-vault-green text-xs tracking-widest uppercase hover:text-vault-green-hover">
-            ← Volver al catálogo
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  const price         = game.discount_price || game.original_price
+  const price       = game.discount_price || game.original_price
   const originalPrice = game.original_price
-  const hasDiscount   = game.discount && game.discount > 0
-  const youtubeId     = getYouTubeId(game.trailer_url)
-  const extraImages   = Array.isArray(game.images) ? game.images : []
+  const hasDiscount = game.discount && game.discount > 0
+  const youtubeId   = getYouTubeId(game.trailer_url)
+  const extraImages = Array.isArray(game.images) ? game.images.filter(Boolean) : []
 
-  // Construir la lista de miniaturas: trailer primero si existe, luego imágenes adicionales
-  const thumbnails = [
-    ...(youtubeId ? [{ type: 'trailer', key: 'trailer' }] : []),
-    ...extraImages.map((url, i) => ({ type: 'image', url, key: i })),
-  ]
-
-  // Contenido del visor principal
   const renderMainMedia = () => {
     if (activeMedia === 'trailer' && youtubeId) {
       return (
@@ -143,13 +110,20 @@ export default function GameDetail() {
         <img
           src={extraImages[activeMedia]}
           alt={`${game.title} imagen ${activeMedia + 1}`}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
+          style={{ background: '#0a0c0a' }}
         />
       )
     }
-    // Por defecto: imagen principal
     if (game.image_url) {
-      return <img src={game.image_url} alt={game.title} className="w-full h-full object-cover" />
+      return (
+        <img
+          src={game.image_url}
+          alt={game.title}
+          className="w-full h-full object-contain"
+          style={{ background: '#0a0c0a' }}
+        />
+      )
     }
     return <span className="text-vault-hint text-8xl font-bold">V</span>
   }
@@ -158,7 +132,6 @@ export default function GameDetail() {
     <div className="bg-vault-black min-h-screen font-mono">
       <div className="max-w-7xl mx-auto px-6 py-10">
 
-        {/* Breadcrumb */}
         <div className="text-vault-hint text-xs tracking-widest mb-8">
           <Link to="/" className="hover:text-vault-green transition-colors">Catálogo</Link>
           <span className="mx-2">›</span>
@@ -168,71 +141,64 @@ export default function GameDetail() {
         </div>
 
         <div className="flex gap-10">
-
-          {/* Columna izquierda */}
           <div className="flex-1">
 
-            {/* Visor principal */}
-            <div className="w-full h-72 bg-vault-dark border border-vault-green-dark rounded-lg flex items-center justify-center mb-4 overflow-hidden">
+            {/* Visor principal — formato panorámico 21:9 */}
+            <div
+              className="w-full bg-vault-dark border border-vault-green-dark rounded-lg mb-4 overflow-hidden flex items-center justify-center"
+              style={{ aspectRatio: '21/9', maxHeight: '420px' }}
+            >
               {renderMainMedia()}
             </div>
 
             {/* Miniaturas */}
-            {(thumbnails.length > 0 || game.image_url) && (
-              <div className="flex gap-3 mb-8 overflow-x-auto pb-1">
+            <div className="flex gap-3 mb-8 overflow-x-auto pb-1">
 
-                {/* Miniatura imagen principal */}
+              {/* Imagen principal */}
+              <button
+                onClick={() => setActiveMedia(null)}
+                className={`w-24 h-16 flex-shrink-0 rounded border overflow-hidden transition-colors ${
+                  activeMedia === null ? 'border-vault-green' : 'border-vault-green-dark hover:border-vault-green'
+                }`}
+              >
+                {game.image_url
+                  ? <img src={game.image_url} alt="Principal" className="w-full h-full object-cover" />
+                  : <div className="w-full h-full bg-vault-dark flex items-center justify-center text-vault-hint text-xs">V</div>
+                }
+              </button>
+
+              {/* Trailer */}
+              {youtubeId && (
                 <button
-                  onClick={() => setActiveMedia(null)}
-                  className={`w-20 h-14 flex-shrink-0 rounded border overflow-hidden transition-colors ${
-                    activeMedia === null
-                      ? 'border-vault-green'
-                      : 'border-vault-green-dark hover:border-vault-green'
+                  onClick={() => setActiveMedia('trailer')}
+                  className={`w-24 h-16 flex-shrink-0 rounded border overflow-hidden relative transition-colors ${
+                    activeMedia === 'trailer' ? 'border-vault-green' : 'border-vault-green-dark hover:border-vault-green'
                   }`}
                 >
-                  {game.image_url
-                    ? <img src={game.image_url} alt="Principal" className="w-full h-full object-cover" />
-                    : <div className="w-full h-full bg-vault-dark flex items-center justify-center text-vault-hint text-xs">V</div>
-                  }
+                  <img
+                    src={`https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg`}
+                    alt="Trailer"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <span className="text-white text-xl">▶</span>
+                  </div>
                 </button>
+              )}
 
-                {/* Miniatura trailer */}
-                {youtubeId && (
-                  <button
-                    onClick={() => setActiveMedia('trailer')}
-                    className={`w-20 h-14 flex-shrink-0 rounded border overflow-hidden relative transition-colors ${
-                      activeMedia === 'trailer'
-                        ? 'border-vault-green'
-                        : 'border-vault-green-dark hover:border-vault-green'
-                    }`}
-                  >
-                    <img
-                      src={`https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg`}
-                      alt="Trailer"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <span className="text-white text-lg">▶</span>
-                    </div>
-                  </button>
-                )}
-
-                {/* Miniaturas imágenes adicionales */}
-                {extraImages.map((url, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveMedia(i)}
-                    className={`w-20 h-14 flex-shrink-0 rounded border overflow-hidden transition-colors ${
-                      activeMedia === i
-                        ? 'border-vault-green'
-                        : 'border-vault-green-dark hover:border-vault-green'
-                    }`}
-                  >
-                    <img src={url} alt={`Imagen ${i + 1}`} className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
+              {/* Imágenes adicionales */}
+              {extraImages.map((url, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveMedia(i)}
+                  className={`w-24 h-16 flex-shrink-0 rounded border overflow-hidden transition-colors ${
+                    activeMedia === i ? 'border-vault-green' : 'border-vault-green-dark hover:border-vault-green'
+                  }`}
+                >
+                  <img src={url} alt={`Imagen ${i + 1}`} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
 
             {/* Descripción */}
             <div className="mb-8">
@@ -259,19 +225,11 @@ export default function GameDetail() {
                 <span className="text-vault-muted text-xs tracking-widest uppercase">Reseñas de usuarios</span>
                 <span className="text-vault-hint text-xs">({game.reviews?.length || 0})</span>
               </div>
-
               <div className="flex flex-col gap-4 mb-6">
-                {game.reviews?.map((review) => (
-                  <ReviewCard key={review.id} review={review} />
-                ))}
-                {game.reviews?.length === 0 && (
-                  <p className="text-vault-hint text-xs tracking-wide">Aún no hay reseñas. ¡Sé el primero!</p>
-                )}
+                {game.reviews?.map((review) => <ReviewCard key={review.id} review={review} />)}
+                {game.reviews?.length === 0 && <p className="text-vault-hint text-xs tracking-wide">Aún no hay reseñas. ¡Sé el primero!</p>}
               </div>
-
-              {user && purchased && (
-                <ReviewForm gameId={game.id} onReviewAdded={handleReviewAdded} />
-              )}
+              {user && purchased && <ReviewForm gameId={game.id} onReviewAdded={handleReviewAdded} />}
               {user && !purchased && (
                 <div className="bg-vault-dark border border-vault-green-dark rounded-lg p-4 text-center">
                   <p className="text-vault-hint text-xs tracking-wide">Debes comprar el juego para escribir una reseña</p>
@@ -294,7 +252,6 @@ export default function GameDetail() {
               <h1 className="text-vault-text text-xl font-bold tracking-wide">{game.title}</h1>
               <p className="text-vault-hint text-xs">{game.developer} · {game.release_date}</p>
 
-              {/* Valoración */}
               <div className="flex items-center gap-2">
                 <span className="text-vault-warning text-lg">★</span>
                 <span className="text-vault-text text-sm font-bold">
@@ -303,118 +260,64 @@ export default function GameDetail() {
                 <span className="text-vault-hint text-xs">({game.reviews?.length || 0} reseñas)</span>
               </div>
 
-              {/* Precio */}
               <div className="border-t border-vault-green-dark pt-4">
-                {hasDiscount ? (
+                {hasDiscount && (
                   <div className="flex items-center gap-3 mb-1">
-                    <span className="text-vault-hint text-sm line-through">
-                      {parseFloat(originalPrice).toFixed(2)}€
-                    </span>
-                    <span className="bg-vault-green text-vault-black text-xs font-bold px-2 py-0.5 rounded tracking-widest">
-                      -{game.discount}%
-                    </span>
+                    <span className="text-vault-hint text-sm line-through">{parseFloat(originalPrice).toFixed(2)}€</span>
+                    <span className="bg-vault-green text-vault-black text-xs font-bold px-2 py-0.5 rounded tracking-widest">-{game.discount}%</span>
                   </div>
-                ) : null}
+                )}
                 <span className="text-vault-green text-3xl font-bold tracking-widest">
                   {parseFloat(price) === 0 ? 'GRATIS' : `${parseFloat(price).toFixed(2)}€`}
                 </span>
               </div>
 
-              {/* Mensaje de compra exitosa con clave */}
               {purchaseSuccess && activationKey && (
                 <div className="bg-vault-green/10 border border-vault-green rounded-lg p-4 flex flex-col gap-2">
                   <p className="text-vault-green text-xs font-bold tracking-widest uppercase">✓ ¡Compra completada!</p>
                   <p className="text-vault-hint text-xs">Tu clave de activación:</p>
                   <p className="text-vault-green font-bold text-sm tracking-widest">{activationKey}</p>
-                  <button
-                    onClick={() => navigate('/profile')}
-                    className="mt-1 text-vault-black bg-vault-green hover:bg-vault-green-hover text-xs font-bold tracking-widest uppercase py-2 rounded transition-colors"
-                  >
+                  <button onClick={() => navigate('/profile')} className="mt-1 text-vault-black bg-vault-green hover:bg-vault-green-hover text-xs font-bold tracking-widest uppercase py-2 rounded transition-colors">
                     Ver en mi biblioteca →
                   </button>
                 </div>
               )}
 
-              {/* Botones de acción */}
               {purchased && !purchaseSuccess ? (
                 <div className="flex flex-col gap-2">
-                  <div className="bg-vault-card border border-vault-green text-vault-green text-xs text-center py-3 rounded tracking-widest uppercase">
-                    ✓ En tu biblioteca
-                  </div>
-                  <button
-                    onClick={() => navigate('/profile')}
-                    className="w-full border border-vault-green-dark hover:border-vault-green text-vault-muted hover:text-vault-green text-xs tracking-widest uppercase py-2.5 rounded transition-colors"
-                  >
+                  <div className="bg-vault-card border border-vault-green text-vault-green text-xs text-center py-3 rounded tracking-widest uppercase">✓ En tu biblioteca</div>
+                  <button onClick={() => navigate('/profile')} className="w-full border border-vault-green-dark hover:border-vault-green text-vault-muted hover:text-vault-green text-xs tracking-widest uppercase py-2.5 rounded transition-colors">
                     Ver en mi biblioteca →
                   </button>
                 </div>
               ) : !purchased ? (
                 <div className="flex flex-col gap-2">
-                  <button
-                    onClick={handlePurchase}
-                    disabled={purchasing || !user}
-                    className="w-full bg-vault-green hover:bg-vault-green-hover disabled:opacity-40 text-vault-black font-bold py-3 rounded tracking-widest uppercase text-sm transition-colors"
-                  >
+                  <button onClick={handlePurchase} disabled={purchasing || !user} className="w-full bg-vault-green hover:bg-vault-green-hover disabled:opacity-40 text-vault-black font-bold py-3 rounded tracking-widest uppercase text-sm transition-colors">
                     {!user ? 'Inicia sesión para comprar' : purchasing ? 'Procesando...' : 'Comprar ahora'}
                   </button>
-
                   {user && parseFloat(price) > 0 && (
-                    <button
-                      onClick={() => addToCart(game)}
-                      disabled={inCart}
-                      className={`w-full py-2.5 rounded tracking-widest uppercase text-xs transition-colors border font-bold ${
-                        inCart
-                          ? 'border-vault-green bg-vault-green/10 text-vault-green cursor-default'
-                          : 'border-vault-green-dark text-vault-muted hover:border-vault-green hover:text-vault-green'
-                      }`}
-                    >
+                    <button onClick={() => addToCart(game)} disabled={inCart} className={`w-full py-2.5 rounded tracking-widest uppercase text-xs transition-colors border font-bold ${inCart ? 'border-vault-green bg-vault-green/10 text-vault-green cursor-default' : 'border-vault-green-dark text-vault-muted hover:border-vault-green hover:text-vault-green'}`}>
                       {inCart ? '✓ En el carrito' : '+ Añadir al carrito'}
                     </button>
                   )}
                 </div>
               ) : null}
 
-              {/* Wishlist */}
               {user && !purchased && (
-                <button
-                  onClick={toggleWishlist}
-                  className={`w-full py-2.5 rounded tracking-widest uppercase text-xs transition-colors border ${
-                    inWishlist
-                      ? 'bg-vault-green/10 border-vault-green text-vault-green'
-                      : 'border-vault-green-dark text-vault-muted hover:border-vault-green hover:text-vault-green'
-                  }`}
-                >
+                <button onClick={toggleWishlist} className={`w-full py-2.5 rounded tracking-widest uppercase text-xs transition-colors border ${inWishlist ? 'bg-vault-green/10 border-vault-green text-vault-green' : 'border-vault-green-dark text-vault-muted hover:border-vault-green hover:text-vault-green'}`}>
                   {inWishlist ? '♥ En lista de deseos' : '♡ Añadir a deseos'}
                 </button>
               )}
 
-              {/* Detalles */}
               <div className="flex flex-col gap-2 border-t border-vault-green-dark pt-4">
-                <div className="flex justify-between">
-                  <span className="text-vault-hint text-xs">Género</span>
-                  <span className="text-vault-muted text-xs">{game.categories[0]?.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-vault-hint text-xs">Plataforma</span>
-                  <span className="text-vault-muted text-xs">{game.platform}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-vault-hint text-xs">Desarrollador</span>
-                  <span className="text-vault-muted text-xs">{game.developer}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-vault-hint text-xs">Lanzamiento</span>
-                  <span className="text-vault-muted text-xs">{game.release_date}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-vault-hint text-xs">Idiomas</span>
-                  <span className="text-vault-muted text-xs">{game.languages}</span>
-                </div>
+                <div className="flex justify-between"><span className="text-vault-hint text-xs">Género</span><span className="text-vault-muted text-xs">{game.categories[0]?.name}</span></div>
+                <div className="flex justify-between"><span className="text-vault-hint text-xs">Plataforma</span><span className="text-vault-muted text-xs">{game.platform}</span></div>
+                <div className="flex justify-between"><span className="text-vault-hint text-xs">Desarrollador</span><span className="text-vault-muted text-xs">{game.developer}</span></div>
+                <div className="flex justify-between"><span className="text-vault-hint text-xs">Lanzamiento</span><span className="text-vault-muted text-xs">{game.release_date}</span></div>
+                <div className="flex justify-between"><span className="text-vault-hint text-xs">Idiomas</span><span className="text-vault-muted text-xs">{game.languages}</span></div>
               </div>
-
             </div>
           </div>
-
         </div>
       </div>
     </div>
