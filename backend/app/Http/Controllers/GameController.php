@@ -93,6 +93,9 @@ class GameController extends Controller
             'categories'     => 'nullable|array',
             'categories.*'   => 'exists:categories,id',
             'admin_id'       => 'nullable|string',
+            'images'         => 'nullable|array',
+            'images.*'       => 'url',
+            'trailer_url'    => 'nullable|url',
         ]);
 
         // Calcular discount_price automáticamente
@@ -126,6 +129,9 @@ class GameController extends Controller
             'status'         => 'in:draft,published',
             'categories'     => 'nullable|array',
             'categories.*'   => 'exists:categories,id',
+            'images'         => 'nullable|array',
+            'images.*'       => 'url',
+            'trailer_url'    => 'nullable|url',
         ]);
 
         // Recalcular discount_price automáticamente
