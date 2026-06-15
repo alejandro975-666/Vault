@@ -80,6 +80,7 @@ class AuthController extends Controller
             'bio'     => 'nullable|string|max:500',
             'country' => 'nullable|string|max:100',
             'email'   => 'required|email|unique:users,email,' . $user->id,
+            'avatar_url' => 'nullable|url|max:500',
         ]);
     
         $user->update($data);
