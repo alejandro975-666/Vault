@@ -11,8 +11,9 @@ const PLATFORMS = [
 
 const emptyForm = {
   title: '', original_price: '', discount: '',
-  description: '', image_url: '', platform: '',
-  developer: '', status: 'draft', categories: []
+  description: '', image_url: '', images: [],
+  trailer_url: '', platform: '', developer: '',
+  status: 'draft', categories: []
 }
 
 export default function ManageGames() {
@@ -27,7 +28,6 @@ export default function ManageGames() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
 
-  // Precio rebajado calculado automáticamente
   const discountedPrice = form.original_price && form.discount
     ? (parseFloat(form.original_price) * (1 - parseFloat(form.discount) / 100)).toFixed(2)
     : form.original_price
@@ -59,6 +59,8 @@ export default function ManageGames() {
       discount:       game.discount || '',
       description:    game.description || '',
       image_url:      game.image_url || '',
+      images:         Array.isArray(game.images) ? game.images : [],
+      trailer_url:    game.trailer_url || '',
       platform:       game.platform || '',
       developer:      game.developer || '',
       status:         game.status,
@@ -345,9 +347,9 @@ export default function ManageGames() {
                   />
                 </div>
 
-                {/* URL imagen */}
+                {/* URL imagen principal */}
                 <div>
-                  <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">URL de imagen</label>
+                  <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">URL de imagen principal</label>
                   <input
                     type="text"
                     value={form.image_url}
@@ -358,6 +360,38 @@ export default function ManageGames() {
                   {form.image_url && (
                     <img src={form.image_url} alt="preview" className="mt-2 h-20 rounded border border-vault-green-dark object-cover" />
                   )}
+                </div>
+
+                {/* Imágenes adicionales */}
+                <div>
+                  <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">
+                    Imágenes adicionales (una URL por línea)
+                  </label>
+                  <textarea
+                    value={Array.isArray(form.images) ? form.images.join('\n') : ''}
+                    onChange={(e) => setForm({
+                      ...form,
+                      images: e.target.value.split('\n').filter(url => url.trim() !== '')
+                    })}
+                    rows={3}
+                    placeholder={'https://imagen1.jpg\nhttps://imagen2.jpg\nhttps://imagen3.jpg'}
+                    className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono resize-none placeholder-vault-hint"
+                  />
+                  <p className="text-vault-hint text-xs mt-1">Una URL por línea</p>
+                </div>
+
+                {/* Trailer */}
+                <div>
+                  <label className="block text-vault-hint text-xs tracking-widest uppercase mb-2">
+                    URL del trailer (YouTube)
+                  </label>
+                  <input
+                    type="text"
+                    value={form.trailer_url}
+                    onChange={(e) => setForm({ ...form, trailer_url: e.target.value })}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    className="w-full bg-vault-card border border-vault-green-dark rounded px-4 py-2.5 text-vault-text text-sm focus:outline-none focus:border-vault-green transition-colors font-mono placeholder-vault-hint"
+                  />
                 </div>
 
                 {/* Categorías */}
