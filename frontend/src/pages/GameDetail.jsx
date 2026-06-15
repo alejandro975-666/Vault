@@ -9,6 +9,13 @@ import { getGame } from '../api/games'
 import { purchaseGame, getLibrary } from '../api/purchases'
 import { addToWishlist, removeFromWishlist, getWishlist } from '../api/wishlist'
 
+// Extrae el ID de YouTube de cualquier formato de URL
+const getYouTubeId = (url) => {
+  if (!url) return null
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/)
+  return match ? match[1] : null
+}
+
 export default function GameDetail() {
   const { id } = useParams()
   const { user } = useAuth()
@@ -23,6 +30,7 @@ export default function GameDetail() {
   const [purchasing, setPurchasing] = useState(false)
   const [purchaseSuccess, setPurchaseSuccess] = useState(false)
   const [activationKey, setActivationKey] = useState(null)
+  const [activeMedia, setActiveMedia] = useState(null) // null = imagen principal, 'trailer' = trailer, número = índice imagen adicional
 
   const inCart = cart.some((g) => g.id === game?.id)
 
@@ -34,17 +42,14 @@ export default function GameDetail() {
       .finally(() => setLoading(false))
   }, [id])
 
-  // Comprobar si ya está en biblioteca o wishlist
   useEffect(() => {
     if (!user) return
-
     getWishlist()
       .then((res) => {
         const inList = res.data.some((g) => g.id === id)
         setInWishlist(inList)
       })
       .catch(() => {})
-
     getLibrary()
       .then((res) => {
         const owned = res.data.some((g) => g.id === id)
@@ -62,9 +67,7 @@ export default function GameDetail() {
       setPurchaseSuccess(true)
       setActivationKey(res.data?.activation_key || null)
     } catch (err) {
-      if (err.response?.status === 409) {
-        setPurchased(true)
-      }
+      if (err.response?.status === 409) setPurchased(true)
     } finally {
       setPurchasing(false)
     }
@@ -110,9 +113,46 @@ export default function GameDetail() {
     )
   }
 
-  const price         = game.discount_price || game.price
-  const originalPrice = game.original_price || game.price
+  const price         = game.discount_price || game.original_price
+  const originalPrice = game.original_price
   const hasDiscount   = game.discount && game.discount > 0
+  const youtubeId     = getYouTubeId(game.trailer_url)
+  const extraImages   = Array.isArray(game.images) ? game.images : []
+
+  // Construir la lista de miniaturas: trailer primero si existe, luego imágenes adicionales
+  const thumbnails = [
+    ...(youtubeId ? [{ type: 'trailer', key: 'trailer' }] : []),
+    ...extraImages.map((url, i) => ({ type: 'image', url, key: i })),
+  ]
+
+  // Contenido del visor principal
+  const renderMainMedia = () => {
+    if (activeMedia === 'trailer' && youtubeId) {
+      return (
+        <iframe
+          src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
+          title={`Trailer de ${game.title}`}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className="w-full h-full"
+        />
+      )
+    }
+    if (typeof activeMedia === 'number' && extraImages[activeMedia]) {
+      return (
+        <img
+          src={extraImages[activeMedia]}
+          alt={`${game.title} imagen ${activeMedia + 1}`}
+          className="w-full h-full object-cover"
+        />
+      )
+    }
+    // Por defecto: imagen principal
+    if (game.image_url) {
+      return <img src={game.image_url} alt={game.title} className="w-full h-full object-cover" />
+    }
+    return <span className="text-vault-hint text-8xl font-bold">V</span>
+  }
 
   return (
     <div className="bg-vault-black min-h-screen font-mono">
@@ -132,23 +172,67 @@ export default function GameDetail() {
           {/* Columna izquierda */}
           <div className="flex-1">
 
-            {/* Imagen principal */}
+            {/* Visor principal */}
             <div className="w-full h-72 bg-vault-dark border border-vault-green-dark rounded-lg flex items-center justify-center mb-4 overflow-hidden">
-              {game.image_url ? (
-                <img src={game.image_url} alt={game.title} className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-vault-hint text-8xl font-bold">V</span>
-              )}
+              {renderMainMedia()}
             </div>
 
             {/* Miniaturas */}
-            <div className="flex gap-3 mb-8">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="w-20 h-14 bg-vault-dark border border-vault-green-dark rounded cursor-pointer hover:border-vault-green transition-colors flex items-center justify-center">
-                  <span className="text-vault-hint text-xs">V</span>
-                </div>
-              ))}
-            </div>
+            {(thumbnails.length > 0 || game.image_url) && (
+              <div className="flex gap-3 mb-8 overflow-x-auto pb-1">
+
+                {/* Miniatura imagen principal */}
+                <button
+                  onClick={() => setActiveMedia(null)}
+                  className={`w-20 h-14 flex-shrink-0 rounded border overflow-hidden transition-colors ${
+                    activeMedia === null
+                      ? 'border-vault-green'
+                      : 'border-vault-green-dark hover:border-vault-green'
+                  }`}
+                >
+                  {game.image_url
+                    ? <img src={game.image_url} alt="Principal" className="w-full h-full object-cover" />
+                    : <div className="w-full h-full bg-vault-dark flex items-center justify-center text-vault-hint text-xs">V</div>
+                  }
+                </button>
+
+                {/* Miniatura trailer */}
+                {youtubeId && (
+                  <button
+                    onClick={() => setActiveMedia('trailer')}
+                    className={`w-20 h-14 flex-shrink-0 rounded border overflow-hidden relative transition-colors ${
+                      activeMedia === 'trailer'
+                        ? 'border-vault-green'
+                        : 'border-vault-green-dark hover:border-vault-green'
+                    }`}
+                  >
+                    <img
+                      src={`https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg`}
+                      alt="Trailer"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                      <span className="text-white text-lg">▶</span>
+                    </div>
+                  </button>
+                )}
+
+                {/* Miniaturas imágenes adicionales */}
+                {extraImages.map((url, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveMedia(i)}
+                    className={`w-20 h-14 flex-shrink-0 rounded border overflow-hidden transition-colors ${
+                      activeMedia === i
+                        ? 'border-vault-green'
+                        : 'border-vault-green-dark hover:border-vault-green'
+                    }`}
+                  >
+                    <img src={url} alt={`Imagen ${i + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Descripción */}
             <div className="mb-8">
@@ -188,13 +272,11 @@ export default function GameDetail() {
               {user && purchased && (
                 <ReviewForm gameId={game.id} onReviewAdded={handleReviewAdded} />
               )}
-
               {user && !purchased && (
                 <div className="bg-vault-dark border border-vault-green-dark rounded-lg p-4 text-center">
                   <p className="text-vault-hint text-xs tracking-wide">Debes comprar el juego para escribir una reseña</p>
                 </div>
               )}
-
               {!user && (
                 <div className="bg-vault-dark border border-vault-green-dark rounded-lg p-4 text-center">
                   <p className="text-vault-hint text-xs tracking-wide">
