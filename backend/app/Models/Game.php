@@ -19,23 +19,24 @@ class Game extends Model
         'developer',
         'publisher',
         'release_date',
-        'price',
         'original_price',
         'discount_price',
         'discount',
         'image_url',
+        'images',
+        'trailer_url',
         'platform',
         'languages',
         'status',
         'admin_id',
     ];
-
+    
     protected $casts = [
-        'price'          => 'decimal:2',
         'original_price' => 'decimal:2',
         'discount_price' => 'decimal:2',
         'discount'       => 'integer',
         'release_date'   => 'date:Y-m-d',
+        'images'         => 'array',
     ];
 
     // ─── Relaciones ────────────────────────────────────────
