@@ -6,7 +6,7 @@ import ReviewForm from '../components/forms/ReviewForm'
 import ReviewCard from '../components/ui/ReviewCard'
 import Spinner from '../components/ui/Spinner'
 import { getGame } from '../api/games'
-import { purchaseGame, getLibrary } from '../api/purchases'
+import { getLibrary } from '../api/purchases'
 import { addToWishlist, removeFromWishlist, getWishlist } from '../api/wishlist'
 
 const getYouTubeId = (url) => {
@@ -26,9 +26,6 @@ export default function GameDetail() {
   const [error, setError] = useState(null)
   const [purchased, setPurchased] = useState(false)
   const [inWishlist, setInWishlist] = useState(false)
-  const [purchasing, setPurchasing] = useState(false)
-  const [purchaseSuccess, setPurchaseSuccess] = useState(false)
-  const [activationKey, setActivationKey] = useState(null)
   const [activeMedia, setActiveMedia] = useState(null)
 
   const inCart = cart.some((g) => g.id === game?.id)
@@ -51,32 +48,27 @@ export default function GameDetail() {
       .catch(() => {})
   }, [user, id])
 
-  const handlePurchase = async () => {
+  const handlePurchase = () => {
     if (!user) return
-    setPurchasing(true)
-    try {
-      const res = await purchaseGame(id)
-      setPurchased(true)
-      setPurchaseSuccess(true)
-      setActivationKey(res.data?.activation_key || null)
-    } catch (err) {
-      if (err.response?.status === 409) setPurchased(true)
-    } finally {
-      setPurchasing(false)
-    }
+    addToCart(game)
+    navigate('/checkout')
   }
 
   const toggleWishlist = async () => {
     if (!user) return
     try {
       if (inWishlist) { await removeFromWishlist(game.id); setInWishlist(false) }
-      else            { await addToWishlist(game.id);    setInWishlist(true)  }
+      else            { await addToWishlist(game.id);      setInWishlist(true)  }
     } catch (err) { console.error(err) }
   }
 
   const handleReviewAdded = () => getGame(id).then((res) => setGame(res.data))
 
-  if (loading) return <div className="bg-vault-black min-h-screen flex items-center justify-center"><Spinner text="Cargando juego..." /></div>
+  if (loading) return (
+    <div className="bg-vault-black min-h-screen flex items-center justify-center">
+      <Spinner text="Cargando juego..." />
+    </div>
+  )
 
   if (error || !game) return (
     <div className="bg-vault-black min-h-screen flex items-center justify-center font-mono">
@@ -87,11 +79,11 @@ export default function GameDetail() {
     </div>
   )
 
-  const price       = game.discount_price || game.original_price
+  const price         = game.discount_price || game.original_price
   const originalPrice = game.original_price
-  const hasDiscount = game.discount && game.discount > 0
-  const youtubeId   = getYouTubeId(game.trailer_url)
-  const extraImages = Array.isArray(game.images) ? game.images.filter(Boolean) : []
+  const hasDiscount   = game.discount && game.discount > 0
+  const youtubeId     = getYouTubeId(game.trailer_url)
+  const extraImages   = Array.isArray(game.images) ? game.images.filter(Boolean) : []
 
   const renderMainMedia = () => {
     if (activeMedia === 'trailer' && youtubeId) {
@@ -132,6 +124,7 @@ export default function GameDetail() {
     <div className="bg-vault-black min-h-screen font-mono">
       <div className="max-w-7xl mx-auto px-6 py-10">
 
+        {/* Breadcrumb */}
         <div className="text-vault-hint text-xs tracking-widest mb-8">
           <Link to="/" className="hover:text-vault-green transition-colors">Catálogo</Link>
           <span className="mx-2">›</span>
@@ -141,6 +134,8 @@ export default function GameDetail() {
         </div>
 
         <div className="flex gap-10">
+
+          {/* Columna izquierda */}
           <div className="flex-1">
 
             {/* Visor principal — formato panorámico 21:9 */}
@@ -227,7 +222,9 @@ export default function GameDetail() {
               </div>
               <div className="flex flex-col gap-4 mb-6">
                 {game.reviews?.map((review) => <ReviewCard key={review.id} review={review} />)}
-                {game.reviews?.length === 0 && <p className="text-vault-hint text-xs tracking-wide">Aún no hay reseñas. ¡Sé el primero!</p>}
+                {game.reviews?.length === 0 && (
+                  <p className="text-vault-hint text-xs tracking-wide">Aún no hay reseñas. ¡Sé el primero!</p>
+                )}
               </div>
               {user && purchased && <ReviewForm gameId={game.id} onReviewAdded={handleReviewAdded} />}
               {user && !purchased && (
@@ -252,6 +249,7 @@ export default function GameDetail() {
               <h1 className="text-vault-text text-xl font-bold tracking-wide">{game.title}</h1>
               <p className="text-vault-hint text-xs">{game.developer} · {game.release_date}</p>
 
+              {/* Valoración */}
               <div className="flex items-center gap-2">
                 <span className="text-vault-warning text-lg">★</span>
                 <span className="text-vault-text text-sm font-bold">
@@ -260,6 +258,7 @@ export default function GameDetail() {
                 <span className="text-vault-hint text-xs">({game.reviews?.length || 0} reseñas)</span>
               </div>
 
+              {/* Precio */}
               <div className="border-t border-vault-green-dark pt-4">
                 {hasDiscount && (
                   <div className="flex items-center gap-3 mb-1">
@@ -272,43 +271,60 @@ export default function GameDetail() {
                 </span>
               </div>
 
-              {purchaseSuccess && activationKey && (
-                <div className="bg-vault-green/10 border border-vault-green rounded-lg p-4 flex flex-col gap-2">
-                  <p className="text-vault-green text-xs font-bold tracking-widest uppercase">✓ ¡Compra completada!</p>
-                  <p className="text-vault-hint text-xs">Tu clave de activación:</p>
-                  <p className="text-vault-green font-bold text-sm tracking-widest">{activationKey}</p>
-                  <button onClick={() => navigate('/profile')} className="mt-1 text-vault-black bg-vault-green hover:bg-vault-green-hover text-xs font-bold tracking-widest uppercase py-2 rounded transition-colors">
+              {/* Botones de acción */}
+              {purchased ? (
+                <div className="flex flex-col gap-2">
+                  <div className="bg-vault-card border border-vault-green text-vault-green text-xs text-center py-3 rounded tracking-widest uppercase">
+                    ✓ En tu biblioteca
+                  </div>
+                  <button
+                    onClick={() => navigate('/profile')}
+                    className="w-full border border-vault-green-dark hover:border-vault-green text-vault-muted hover:text-vault-green text-xs tracking-widest uppercase py-2.5 rounded transition-colors"
+                  >
                     Ver en mi biblioteca →
                   </button>
                 </div>
-              )}
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={handlePurchase}
+                    disabled={!user}
+                    className="w-full bg-vault-green hover:bg-vault-green-hover disabled:opacity-40 text-vault-black font-bold py-3 rounded tracking-widest uppercase text-sm transition-colors"
+                  >
+                    {!user ? 'Inicia sesión para comprar' : 'Comprar ahora'}
+                  </button>
 
-              {purchased && !purchaseSuccess ? (
-                <div className="flex flex-col gap-2">
-                  <div className="bg-vault-card border border-vault-green text-vault-green text-xs text-center py-3 rounded tracking-widest uppercase">✓ En tu biblioteca</div>
-                  <button onClick={() => navigate('/profile')} className="w-full border border-vault-green-dark hover:border-vault-green text-vault-muted hover:text-vault-green text-xs tracking-widest uppercase py-2.5 rounded transition-colors">
-                    Ver en mi biblioteca →
-                  </button>
-                </div>
-              ) : !purchased ? (
-                <div className="flex flex-col gap-2">
-                  <button onClick={handlePurchase} disabled={purchasing || !user} className="w-full bg-vault-green hover:bg-vault-green-hover disabled:opacity-40 text-vault-black font-bold py-3 rounded tracking-widest uppercase text-sm transition-colors">
-                    {!user ? 'Inicia sesión para comprar' : purchasing ? 'Procesando...' : 'Comprar ahora'}
-                  </button>
                   {user && parseFloat(price) > 0 && (
-                    <button onClick={() => addToCart(game)} disabled={inCart} className={`w-full py-2.5 rounded tracking-widest uppercase text-xs transition-colors border font-bold ${inCart ? 'border-vault-green bg-vault-green/10 text-vault-green cursor-default' : 'border-vault-green-dark text-vault-muted hover:border-vault-green hover:text-vault-green'}`}>
+                    <button
+                      onClick={() => addToCart(game)}
+                      disabled={inCart}
+                      className={`w-full py-2.5 rounded tracking-widest uppercase text-xs transition-colors border font-bold ${
+                        inCart
+                          ? 'border-vault-green bg-vault-green/10 text-vault-green cursor-default'
+                          : 'border-vault-green-dark text-vault-muted hover:border-vault-green hover:text-vault-green'
+                      }`}
+                    >
                       {inCart ? '✓ En el carrito' : '+ Añadir al carrito'}
                     </button>
                   )}
                 </div>
-              ) : null}
+              )}
 
+              {/* Wishlist */}
               {user && !purchased && (
-                <button onClick={toggleWishlist} className={`w-full py-2.5 rounded tracking-widest uppercase text-xs transition-colors border ${inWishlist ? 'bg-vault-green/10 border-vault-green text-vault-green' : 'border-vault-green-dark text-vault-muted hover:border-vault-green hover:text-vault-green'}`}>
+                <button
+                  onClick={toggleWishlist}
+                  className={`w-full py-2.5 rounded tracking-widest uppercase text-xs transition-colors border ${
+                    inWishlist
+                      ? 'bg-vault-green/10 border-vault-green text-vault-green'
+                      : 'border-vault-green-dark text-vault-muted hover:border-vault-green hover:text-vault-green'
+                  }`}
+                >
                   {inWishlist ? '♥ En lista de deseos' : '♡ Añadir a deseos'}
                 </button>
               )}
 
+              {/* Detalles */}
               <div className="flex flex-col gap-2 border-t border-vault-green-dark pt-4">
                 <div className="flex justify-between"><span className="text-vault-hint text-xs">Género</span><span className="text-vault-muted text-xs">{game.categories[0]?.name}</span></div>
                 <div className="flex justify-between"><span className="text-vault-hint text-xs">Plataforma</span><span className="text-vault-muted text-xs">{game.platform}</span></div>
@@ -316,8 +332,10 @@ export default function GameDetail() {
                 <div className="flex justify-between"><span className="text-vault-hint text-xs">Lanzamiento</span><span className="text-vault-muted text-xs">{game.release_date}</span></div>
                 <div className="flex justify-between"><span className="text-vault-hint text-xs">Idiomas</span><span className="text-vault-muted text-xs">{game.languages}</span></div>
               </div>
+
             </div>
           </div>
+
         </div>
       </div>
     </div>
